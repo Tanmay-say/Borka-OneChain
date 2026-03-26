@@ -1,130 +1,201 @@
-# 🎮 BORKA - GameFi DApp on OneChain OCT
+# BORKA
 
-> A platformer where nothing is as it seems... except the blockchain!
+BORKA is a browser platformer with optional OneChain integration.
 
-BORKA is a Web3 game that combines classic platforming mechanics with on-chain leaderboards and token rewards on OneChain OCT testnet.
+This README is written to match the current repository state and deployed contract. It is intended as a human-maintained project document, not a generated promo page. If the code changes, this file should be updated with the same standard: describe what is actually implemented, what is deployed, and what still requires manual operation.
 
-![BORKA Game](https://img.shields.io/badge/OneChain-GameFi-blue)
-![React](https://img.shields.io/badge/React-19-61DAFB)
-![Move](https://img.shields.io/badge/Move-Smart%20Contract-4B32C3)
+## What This Project Is
 
----
+The project has two parts:
 
-## ✨ Features
+1. A React frontend in `frontend/`
+2. A Move smart contract in `contracts/`
 
-### 🎯 Gameplay
-- **8 Challenging Levels** with unique mechanics
-- **Double-jump** platforming action
-- **Traps & Obstacles**: Floor drops, spikes, fake platforms, gravity flips
-- **Coin Collection** system for scoring
-- **Death Counter** - every mistake counts!
+The frontend runs as a single-screen canvas platformer with wallet connection, leaderboard display, score submission, and a separate on-chain claim action. The contract stores leaderboard entries on OneChain testnet in a shared object.
 
-### ⛓️ Blockchain Integration
-- **On-Chain Leaderboard** - immutable proof of high scores
-- **Score Submission** - automatic when all levels complete
-- **Token Claims** - earn OCT tokens based on performance
-- **Wallet Integration** - OneWallet browser extension
-- **Graceful Degradation** - game works without wallet connection
+## Current Deployed Contract
 
-### 🎨 Design
-- Custom-drawn Boris character with animations
-- Particle effects and screen shake
-- Smooth 60 FPS canvas rendering
-- Retro pixel-art aesthetic with modern polish
+The current frontend is configured for this deployed testnet package:
 
----
+- Package ID: `0x72c3ef7bfb2ece4ac9b919fdd9d5660625ea4aec9a0e402d4eea85bb26061808`
+- Leaderboard ID: `0x4f9151213ed94e92dd7ea1995b6763a4b845dd0d99779c26593b35c58a19c748`
+- Publish transaction digest: `2MQPAYTR2ETxASJVoPGc4b1Lh395H49ZhZi2cDN4XQsx`
 
-## 🚀 Quick Start
+These values are already set in `frontend/.env`.
 
-### Prerequisites
-```bash
-node >= 16
-yarn
-One CLI
-OneWallet browser extension
-```
+## Tech Stack
 
-### Installation
-```bash
-# Install dependencies
-cd /app/frontend
-yarn install
+- Frontend: React 18, CRACO, Canvas API
+- Wallet / chain client: `@onelabs/dapp-kit`, `@onelabs/sui`
+- Smart contract: Move on OneChain
+- Network target: OneChain testnet
 
-# Start development server
-yarn start
-```
+## Repository Layout
 
-### Deploy Smart Contract
-See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed instructions.
-
-```bash
-# Quick deploy
-cd /app/contracts
-one move build
-one client publish --gas-budget 100000000
-```
-
----
-
-## 📁 Project Structure
-
-```
-/app/
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── BorkaGame.jsx       # Main game component
-│   │   │   ├── WalletButton.jsx    # Wallet connect UI
-│   │   │   └── Leaderboard.jsx     # On-chain leaderboard
-│   │   ├── contexts/
-│   │   │   └── WalletContext.js    # Wallet state management
-│   │   ├── hooks/
-│   │   │   └── useOneChain.js      # Blockchain hooks
-│   │   ├── lib/
-│   │   │   └── onechain.js         # OneChain SDK config
-│   │   └── App.js                  # App with providers
-│   └── .env                        # Contract addresses
+```text
+.
 ├── contracts/
-│   ├── borka_game.move             # Move smart contract
-│   └── Move.toml                   # Package config
-└── DEPLOYMENT_GUIDE.md             # Full deployment guide
+│   ├── Move.toml
+│   └── sources/
+│       └── borka_game.move
+├── frontend/
+│   ├── .env
+│   ├── package.json
+│   └── src/
+│       ├── components/
+│       ├── contexts/
+│       ├── hooks/
+│       └── lib/
+├── DEPLOYMENT_GUIDE.md
+└── README.md
 ```
 
----
+## Local Setup
 
-## 🎮 How to Play
+### Frontend
 
-### Controls
-- **Arrow Keys / WASD**: Move left/right
-- **Space / ↑ / W**: Jump (double-jump enabled!)
+```bash
+cd frontend
+npm install
+npm start
+```
 
-### Objective
-1. Complete all 8 levels
-2. Collect coins 🪙
-3. Avoid traps 💀
-4. Reach the golden door
-5. Submit your score to the blockchain
-6. Claim OCT tokens!
+Production build:
 
-### Levels
-1. **Easy?** - Floor drops
-2. **Watch Your Step** - Rising spikes
-3. **Trust Issues** - Fake platforms
-4. **Keep Moving** - Moving platforms
-5. **Down Is Up** - Gravity flip
-6. **Speed Run** - Crumbling platforms
-7. **Closing In** - Moving wall
-8. **Devil's Den** - All mechanics combined!
+```bash
+cd frontend
+npm run build
+```
 
----
+### Contract
 
-## ⛓️ Smart Contract
+You need a working `one` CLI binary.
 
-### Functions
+Build the package:
 
-#### `submit_score`
+```bash
+cd contracts
+one move build --force
+```
+
+Publish with the active OneChain wallet:
+
+```bash
+cd contracts
+one client publish --gas-budget 500000000
+```
+
+After publishing, copy the new package ID and shared leaderboard object ID into `frontend/.env`.
+
+## Environment Variables
+
+The frontend currently uses:
+
+```env
+REACT_APP_ONECHAIN_RPC=https://rpc-testnet.onelabs.cc:443
+REACT_APP_ONECHAIN_NETWORK=testnet
+REACT_APP_ONECHAIN_EXPLORER=https://onescan.cc/testnet
+REACT_APP_PACKAGE_ID=0x72c3ef7bfb2ece4ac9b919fdd9d5660625ea4aec9a0e402d4eea85bb26061808
+REACT_APP_LEADERBOARD_ID=0x4f9151213ed94e92dd7ea1995b6763a4b845dd0d99779c26593b35c58a19c748
+GENERATE_SOURCEMAP=false
+```
+
+## Gameplay Flow
+
+The game is a level-based platformer. The player controls Boris and moves through 8 levels in sequence.
+
+Core loop:
+
+1. Start at the intro screen.
+2. Choose a level or begin from level 1.
+3. Move with arrow keys or `A` / `D`.
+4. Jump with `Space`, `W`, or `ArrowUp`.
+5. Survive traps, reach the exit door, and collect coins on the way.
+6. On level completion, the next level unlocks.
+7. After level 8, the game enters the win state.
+8. If a wallet is connected, the frontend submits the final run to chain.
+
+The player can still play the game without a wallet. Wallet connection only affects blockchain features.
+
+## Level Flow
+
+The 8 levels currently implemented are:
+
+1. `Easy?` - introduces floor-drop traps
+2. `Watch Your Step` - introduces spikes and moving hazards
+3. `Trust Issues` - introduces fake platforms
+4. `Keep Moving` - introduces moving platforms
+5. `Down Is Up` - introduces gravity flip behavior
+6. `Speed Run` - increases tempo with collapsing sections
+7. `Closing In` - introduces pressure from moving wall logic
+8. `Devil's Den` - combines previous mechanics
+
+The game logic, trap handling, level transitions, and render loop are all in `frontend/src/components/BorkaGame.jsx`.
+
+## Scoring
+
+The frontend computes leaderboard score as:
+
+```text
+score = (coins * 100) - (deaths * 50)
+```
+
+What is tracked during a run:
+
+- Total collected coins
+- Total deaths
+- Completion time in milliseconds
+
+When the player finishes the final level with a connected wallet, the frontend calls:
+
+- `submit_score(coins, deaths, time_ms)`
+
+The leaderboard UI then reads the shared leaderboard object and sorts entries locally by the same computed score.
+
+## Wallet Flow
+
+The current wallet flow is simple:
+
+1. The app asks `@onelabs/dapp-kit` for available wallets.
+2. Clicking the wallet button connects the first available wallet.
+3. Disconnecting is done from the same button.
+4. When connected, the button shows the short wallet address.
+
+The frontend expects a OneWallet-compatible browser wallet on OneChain testnet.
+
+## Smart Contract Design
+
+The Move contract lives in `contracts/sources/borka_game.move`.
+
+The module creates one shared `Leaderboard` object during package initialization.
+
+### Stored Types
+
+`ScoreEntry`
+
+- `player: address`
+- `coins: u64`
+- `deaths: u64`
+- `time_ms: u64`
+
+`Leaderboard`
+
+- `id: UID`
+- `entries: vector<ScoreEntry>`
+- `max_entries: u64`
+
+### Initialization
+
+When the package is published, `init` creates a `Leaderboard` object and shares it on-chain.
+
+That shared object is the object configured in `REACT_APP_LEADERBOARD_ID`.
+
+### `submit_score`
+
+Signature:
+
 ```move
-public entry fun submit_score(
+public fun submit_score(
     board: &mut Leaderboard,
     coins: u64,
     deaths: u64,
@@ -132,129 +203,95 @@ public entry fun submit_score(
     ctx: &mut TxContext,
 )
 ```
-Submits player score to on-chain leaderboard. Replaces previous score from same wallet.
 
-#### `claim_tokens`
+Behavior:
+
+- Reads the transaction sender from `TxContext`
+- Creates a new `ScoreEntry`
+- Removes the sender's previous entry if one already exists
+- Caps storage to `max_entries`
+- Pushes the new entry into the leaderboard
+
+Important detail:
+
+- The contract stores raw run data
+- The sorting formula is applied in the frontend when rendering the leaderboard
+
+### `claim_tokens`
+
+Signature:
+
 ```move
-public entry fun claim_tokens(
+public fun claim_tokens(
     board: &mut Leaderboard,
     coins: u64,
     ctx: &mut TxContext,
 )
 ```
-Proof-of-claim transaction for OCT token rewards.
 
-### Scoring
-```
-Score = (Coins × 100) - (Deaths × 50)
-```
+Current behavior:
 
----
+- Executes an on-chain call
+- Does not transfer OCT
+- Acts only as a proof-of-claim transaction pattern
 
-## 🔧 Tech Stack
+This means the current repo does not contain an on-chain reward distribution system. Any real token reward logic would need additional contract or backend infrastructure.
 
-### Frontend
-- **React 19** - UI framework
-- **Canvas API** - Game rendering
-- **@onelabs/dapp-kit** - Wallet connection
-- **@onelabs/sui** - RPC client & transactions
-- **@tanstack/react-query** - State management
+## Frontend Chain Integration
 
-### Smart Contract
-- **Move Language** - OneChain smart contracts
-- **Sui Framework** - Base libraries
+Chain access is split across these files:
 
-### Blockchain
-- **OneChain OCT Testnet** - Sui-fork L1
-- **OneWallet** - Browser wallet extension
+- `frontend/src/lib/onechain.js`
+  Defines RPC URL, package ID, leaderboard ID, explorer URL, and score helper.
 
----
+- `frontend/src/hooks/useOneChain.js`
+  Builds and signs transactions for `submit_score` and `claim_tokens`, and fetches the leaderboard object.
 
-## 🌐 Deployment
+- `frontend/src/components/Leaderboard.jsx`
+  Loads the shared object from chain and renders the top entries.
 
-### Frontend
-Currently deployed at:
-```
-https://borka-game.preview.emergentagent.com
-```
+- `frontend/src/contexts/WalletContext.js`
+  Holds connected wallet state for the app.
 
-### Contract
-Deployed to OneChain Testnet. See `.env` for addresses.
+## What Is Actually Implemented
 
----
+Implemented now:
 
-## 📖 Documentation
+- Playable 8-level browser game
+- Keyboard and touch input support
+- Wallet connect / disconnect button
+- Automatic score submission after final level completion if a wallet is connected
+- On-chain shared leaderboard object
+- Manual claim transaction call
+- Frontend build that compiles successfully
+- Contract build and publish flow that works against OneChain testnet
 
-- [Full Deployment Guide](./DEPLOYMENT_GUIDE.md)
-- [OneChain Docs](https://docs.onelabs.cc)
-- [Move Language Guide](https://move-language.github.io/move/)
+Not implemented in this repo:
 
----
+- Automatic OCT payout logic on-chain
+- Backend reward processor
+- Persistent off-chain player profiles
+- Admin tools
+- Matchmaking or multiplayer
 
-## 🐛 Troubleshooting
+## Known Operational Notes
 
-### Game won't connect to wallet
-- Ensure OneWallet extension is installed
-- Network must be set to **Testnet**
-- Try refreshing the page
+- `claim_tokens` is not a token mint or transfer function. It is only a transaction call.
+- The README and deployment guide should be updated whenever package IDs or contract behavior change.
+- The dev server may fail inside restricted sandboxes that do not allow binding to `0.0.0.0:3000`. That is an environment restriction, not an application compile error.
 
-### Leaderboard not loading
-- Check contract IDs in `.env`
-- Verify `REACT_APP_LEADERBOARD_ID` is set
-- Restart frontend server
+## Verification Status
 
-### Transaction failing
-- Ensure wallet has testnet OCT
-- Check gas budget is sufficient
-- Verify contract addresses are correct
+Verified in this repository state:
 
-See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for more solutions.
+- `npm run build` in `frontend/` succeeds
+- `one move build --force` in `contracts/` succeeds
+- Contract publish to OneChain testnet succeeded with the package and leaderboard IDs listed above
 
----
+## Deployment Guide
 
-## 🤝 Contributing
+For wallet import, CLI setup, and republishing steps, see [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md).
 
-This is a hackathon project for OneChain. Feel free to:
-- Report bugs
-- Suggest features
-- Submit PRs
+## License
 
----
-
-## 📜 License
-
-MIT License - feel free to use this code for learning and building!
-
----
-
-## 🎯 Roadmap
-
-Future enhancements:
-- [ ] NFT rewards for achievements
-- [ ] Tournament mode with prize pools
-- [ ] Level editor and community levels
-- [ ] Mainnet deployment
-- [ ] Mobile app version
-- [ ] Multiplayer race mode
-
----
-
-## 🙏 Acknowledgments
-
-- OneChain team for the hackathon
-- Sui/Move community for great docs
-- Original "Level Devil" game for inspiration
-
----
-
-## 📞 Support
-
-- Discord: [OneChain Discord](https://discord.gg/onelabs)
-- Twitter: [@OneLabs](https://twitter.com/onelabs)
-- Docs: [docs.onelabs.cc](https://docs.onelabs.cc)
-
----
-
-**Made with ❤️ for OneChain Hackathon**
-
-*Boris says: "The only way out is through... and up... and sideways... and upside down! 🔵"*
+MIT

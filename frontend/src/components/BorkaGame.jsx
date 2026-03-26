@@ -471,6 +471,7 @@ const BorkaGame = () => {
   const keysRef = useRef(new Set());
   const lastTimeRef = useRef(0);
   const rafRef = useRef(0);
+  const updateRef = useRef(null);
   const timeoutRef = useRef(null);
   const messageRef = useRef({ text: '', time: 0, color: '#ff3366' });
   const hudUpdateTimerRef = useRef(0);
@@ -1047,8 +1048,10 @@ const BorkaGame = () => {
     }
 
     // Always re-queue — loop must never stop
-    rafRef.current = requestAnimationFrame(update);
+    rafRef.current = requestAnimationFrame((nextTime) => updateRef.current?.(nextTime));
   };
+
+  updateRef.current = update;
 
   // ═══════════════════════════════════════
   // DRAWING FUNCTIONS
@@ -1505,10 +1508,9 @@ const BorkaGame = () => {
   // GAME LOOP (single unified update + render)
   // ═══════════════════════════════════════
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     lastTimeRef.current = performance.now();
-    rafRef.current = requestAnimationFrame(update);
+    rafRef.current = requestAnimationFrame((time) => updateRef.current?.(time));
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
