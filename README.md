@@ -1,70 +1,260 @@
-# Getting Started with Create React App
+# 🎮 BORKA - GameFi DApp on OneChain OCT
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> A platformer where nothing is as it seems... except the blockchain!
 
-## Available Scripts
+BORKA is a Web3 game that combines classic platforming mechanics with on-chain leaderboards and token rewards on OneChain OCT testnet.
 
-In the project directory, you can run:
+![BORKA Game](https://img.shields.io/badge/OneChain-GameFi-blue)
+![React](https://img.shields.io/badge/React-19-61DAFB)
+![Move](https://img.shields.io/badge/Move-Smart%20Contract-4B32C3)
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## ✨ Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 🎯 Gameplay
+- **8 Challenging Levels** with unique mechanics
+- **Double-jump** platforming action
+- **Traps & Obstacles**: Floor drops, spikes, fake platforms, gravity flips
+- **Coin Collection** system for scoring
+- **Death Counter** - every mistake counts!
 
-### `npm test`
+### ⛓️ Blockchain Integration
+- **On-Chain Leaderboard** - immutable proof of high scores
+- **Score Submission** - automatic when all levels complete
+- **Token Claims** - earn OCT tokens based on performance
+- **Wallet Integration** - OneWallet browser extension
+- **Graceful Degradation** - game works without wallet connection
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 🎨 Design
+- Custom-drawn Boris character with animations
+- Particle effects and screen shake
+- Smooth 60 FPS canvas rendering
+- Retro pixel-art aesthetic with modern polish
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🚀 Quick Start
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Prerequisites
+```bash
+node >= 16
+yarn
+One CLI
+OneWallet browser extension
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Installation
+```bash
+# Install dependencies
+cd /app/frontend
+yarn install
 
-### `npm run eject`
+# Start development server
+yarn start
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Deploy Smart Contract
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed instructions.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+# Quick deploy
+cd /app/contracts
+one move build
+one client publish --gas-budget 100000000
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 📁 Project Structure
 
-## Learn More
+```
+/app/
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── BorkaGame.jsx       # Main game component
+│   │   │   ├── WalletButton.jsx    # Wallet connect UI
+│   │   │   └── Leaderboard.jsx     # On-chain leaderboard
+│   │   ├── contexts/
+│   │   │   └── WalletContext.js    # Wallet state management
+│   │   ├── hooks/
+│   │   │   └── useOneChain.js      # Blockchain hooks
+│   │   ├── lib/
+│   │   │   └── onechain.js         # OneChain SDK config
+│   │   └── App.js                  # App with providers
+│   └── .env                        # Contract addresses
+├── contracts/
+│   ├── borka_game.move             # Move smart contract
+│   └── Move.toml                   # Package config
+└── DEPLOYMENT_GUIDE.md             # Full deployment guide
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🎮 How to Play
 
-### Code Splitting
+### Controls
+- **Arrow Keys / WASD**: Move left/right
+- **Space / ↑ / W**: Jump (double-jump enabled!)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Objective
+1. Complete all 8 levels
+2. Collect coins 🪙
+3. Avoid traps 💀
+4. Reach the golden door
+5. Submit your score to the blockchain
+6. Claim OCT tokens!
 
-### Analyzing the Bundle Size
+### Levels
+1. **Easy?** - Floor drops
+2. **Watch Your Step** - Rising spikes
+3. **Trust Issues** - Fake platforms
+4. **Keep Moving** - Moving platforms
+5. **Down Is Up** - Gravity flip
+6. **Speed Run** - Crumbling platforms
+7. **Closing In** - Moving wall
+8. **Devil's Den** - All mechanics combined!
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+## ⛓️ Smart Contract
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Functions
 
-### Advanced Configuration
+#### `submit_score`
+```move
+public entry fun submit_score(
+    board: &mut Leaderboard,
+    coins: u64,
+    deaths: u64,
+    time_ms: u64,
+    ctx: &mut TxContext,
+)
+```
+Submits player score to on-chain leaderboard. Replaces previous score from same wallet.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+#### `claim_tokens`
+```move
+public entry fun claim_tokens(
+    board: &mut Leaderboard,
+    coins: u64,
+    ctx: &mut TxContext,
+)
+```
+Proof-of-claim transaction for OCT token rewards.
 
-### Deployment
+### Scoring
+```
+Score = (Coins × 100) - (Deaths × 50)
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## 🔧 Tech Stack
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Frontend
+- **React 19** - UI framework
+- **Canvas API** - Game rendering
+- **@onelabs/dapp-kit** - Wallet connection
+- **@onelabs/sui** - RPC client & transactions
+- **@tanstack/react-query** - State management
+
+### Smart Contract
+- **Move Language** - OneChain smart contracts
+- **Sui Framework** - Base libraries
+
+### Blockchain
+- **OneChain OCT Testnet** - Sui-fork L1
+- **OneWallet** - Browser wallet extension
+
+---
+
+## 🌐 Deployment
+
+### Frontend
+Currently deployed at:
+```
+https://borka-game.preview.emergentagent.com
+```
+
+### Contract
+Deployed to OneChain Testnet. See `.env` for addresses.
+
+---
+
+## 📖 Documentation
+
+- [Full Deployment Guide](./DEPLOYMENT_GUIDE.md)
+- [OneChain Docs](https://docs.onelabs.cc)
+- [Move Language Guide](https://move-language.github.io/move/)
+
+---
+
+## 🐛 Troubleshooting
+
+### Game won't connect to wallet
+- Ensure OneWallet extension is installed
+- Network must be set to **Testnet**
+- Try refreshing the page
+
+### Leaderboard not loading
+- Check contract IDs in `.env`
+- Verify `REACT_APP_LEADERBOARD_ID` is set
+- Restart frontend server
+
+### Transaction failing
+- Ensure wallet has testnet OCT
+- Check gas budget is sufficient
+- Verify contract addresses are correct
+
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for more solutions.
+
+---
+
+## 🤝 Contributing
+
+This is a hackathon project for OneChain. Feel free to:
+- Report bugs
+- Suggest features
+- Submit PRs
+
+---
+
+## 📜 License
+
+MIT License - feel free to use this code for learning and building!
+
+---
+
+## 🎯 Roadmap
+
+Future enhancements:
+- [ ] NFT rewards for achievements
+- [ ] Tournament mode with prize pools
+- [ ] Level editor and community levels
+- [ ] Mainnet deployment
+- [ ] Mobile app version
+- [ ] Multiplayer race mode
+
+---
+
+## 🙏 Acknowledgments
+
+- OneChain team for the hackathon
+- Sui/Move community for great docs
+- Original "Level Devil" game for inspiration
+
+---
+
+## 📞 Support
+
+- Discord: [OneChain Discord](https://discord.gg/onelabs)
+- Twitter: [@OneLabs](https://twitter.com/onelabs)
+- Docs: [docs.onelabs.cc](https://docs.onelabs.cc)
+
+---
+
+**Made with ❤️ for OneChain Hackathon**
+
+*Boris says: "The only way out is through... and up... and sideways... and upside down! 🔵"*
