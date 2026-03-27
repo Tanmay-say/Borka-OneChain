@@ -23,13 +23,6 @@ But here's the twist: **your score lives forever on the blockchain.** Beat all 8
 
 Win it all and you unlock the exclusive **Devil Borka NFT skin**, minted directly to your wallet.
 
-<div align="center">
-
-![Home Screen](./frontend/public/home.png)
-*The BORKA home screen — connect your wallet and dive in.*
-
-</div>
-
 ---
 
 ## 🧑‍🎨 Meet the Characters
@@ -47,14 +40,29 @@ The **Devil Borka** skin is special — it's not just cosmetic. It's an on-chain
 
 ---
 
-## 🕹️ Gameplay
+---
+
+## � Game Screenshots
+
+Here's what the full game flow looks like — from the moment you land to the win screen:
 
 <div align="center">
 
-![Gameplay](./frontend/public/gameplay.png)
-*Mid-run on Level 4 — platforms are moving, spikes incoming.*
+| 🏠 Home Screen | 🗺️ Level Select |
+|:---:|:---:|
+| ![Home](docs/screenshots/home.png) | ![Level Select](docs/screenshots/level.png) |
+| *Connect your wallet and jump in* | *The world map — pick your stage* |
+
+| 🎮 In-Game Action | 🏆 Win / Result Screen |
+|:---:|:---:|
+| ![Gameplay](docs/screenshots/gameplay.png) | ![Result](docs/screenshots/result.png) |
+| *Dodge traps and collect coins mid-run* | *Score on-chain, claim reward, mint NFT* |
 
 </div>
+
+---
+
+## 🕹️ Gameplay
 
 ### Controls
 
@@ -83,23 +91,9 @@ Final Score = (Coins × 100) − (Deaths × 50)
 
 Time is also tracked and stored on-chain. The more coins you grab and the fewer times you die, the higher you climb the leaderboard.
 
-<div align="center">
-
-![Result Screen](./frontend/public/result.png)
-*Win screen — score on-chain, claim your OCT reward, and mint the Devil Borka NFT.*
-
-</div>
-
 ---
 
 ## 🗺️ The 8 Levels
-
-<div align="center">
-
-![Level Select](./frontend/public/level.png)
-*The world map — track your progress across all 8 stages and jump back into any unlocked level.*
-
-</div>
 
 Each level has a personality — and a nasty surprise.
 
