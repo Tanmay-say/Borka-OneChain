@@ -408,4 +408,4 @@ Built with ❤️ on OneChain for the **GameFi ecosystem**.
 
 ## 📄 License
 
-MIT © 2025 Borka-OneChain Contributors
+MIT © 2026 Borka-OneChain Contributors
