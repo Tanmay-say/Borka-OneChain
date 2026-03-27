@@ -3,7 +3,7 @@ import { useWallet } from '../contexts/WalletContext';
 import WalletButton from './WalletButton';
 import Leaderboard from './Leaderboard';
 import { checkDevilBorisNFT, useSubmitScore, useClaimTokens, useMintDevilBoris } from '../hooks/useOneChain';
-import { explorerTxUrl } from '../lib/onechain';
+import { explorerTxUrl, publicAssetUrl } from '../lib/onechain';
 
 // ═══════════════════════════════════════
 // BORKA - GameFi on OneChain OCT
@@ -25,7 +25,7 @@ const MAX_JUMPS = 2;
 const SKINS = {
   default: {
     id: 'default',
-    name: 'Classic Boris',
+    name: 'Classic Borka',
     body: '#4ab8e8',
     bodyDark: '#3a8ab8',
     horn: '#8B4513',
@@ -35,7 +35,7 @@ const SKINS = {
   },
   fire: {
     id: 'fire',
-    name: 'Fire Boris',
+    name: 'Fire Borka',
     body: '#ff6b35',
     bodyDark: '#cc4a1a',
     horn: '#cc1144',
@@ -45,7 +45,7 @@ const SKINS = {
   },
   ice: {
     id: 'ice',
-    name: 'Ice Boris',
+    name: 'Ice Borka',
     body: '#a8d8ea',
     bodyDark: '#4a90d9',
     horn: '#4a90d9',
@@ -55,7 +55,7 @@ const SKINS = {
   },
   shadow: {
     id: 'shadow',
-    name: 'Shadow Boris',
+    name: 'Shadow Borka',
     body: '#3d3d3d',
     bodyDark: '#1a1a1a',
     horn: '#666666',
@@ -65,7 +65,7 @@ const SKINS = {
   },
   devil: {
     id: 'devil',
-    name: 'Devil Boris',
+    name: 'Devil Borka',
     body: '#cc0000',
     bodyDark: '#800000',
     horn: '#8b0000',
@@ -509,9 +509,27 @@ const BorkaGame = () => {
 
   // OneChain blockchain hooks
   const { address, isConnected, shortAddress } = useWallet();
-  const { submitScore, isPending: isSubmitting, txDigest: scoreTxDigest } = useSubmitScore();
-  const { claimTokens, isPending: isClaiming, txDigest: claimTxDigest } = useClaimTokens();
-  const { mintNFT, isPending: isMintingNFT, txDigest: nftMintDigest } = useMintDevilBoris();
+  const {
+    submitScore,
+    isPending: isSubmitting,
+    txDigest: scoreTxDigest,
+    error: submitScoreError,
+    reset: resetSubmitScore,
+  } = useSubmitScore();
+  const {
+    claimTokens,
+    isPending: isClaiming,
+    txDigest: claimTxDigest,
+    error: claimTokensError,
+    reset: resetClaimTokens,
+  } = useClaimTokens();
+  const {
+    mintNFT,
+    isPending: isMintingNFT,
+    txDigest: nftMintDigest,
+    error: mintNftError,
+    reset: resetMintNFT,
+  } = useMintDevilBoris();
 
   // Track game start time for elapsed time scoring
   const gameStartTimeRef = useRef(Date.now());
@@ -542,8 +560,18 @@ const BorkaGame = () => {
   useEffect(() => {
     if (scoreTxDigest) {
       setLeaderboardRefreshKey((key) => key + 1);
+      const timeoutId = window.setTimeout(() => {
+        setLeaderboardRefreshKey((key) => key + 1);
+      }, 2000);
+      return () => window.clearTimeout(timeoutId);
     }
   }, [scoreTxDigest]);
+
+  useEffect(() => {
+    if (gameScreen === 'worldmap') {
+      setLeaderboardRefreshKey((key) => key + 1);
+    }
+  }, [gameScreen]);
 
   useEffect(() => {
     if (!isConnected || !address) {
@@ -575,6 +603,19 @@ const BorkaGame = () => {
       setActiveSkin('devil');
     }
   }, [nftMintDigest]);
+
+  const resetRunState = (nextScreen = 'worldmap') => {
+    currentLevelRef.current = 0;
+    totalDeathsRef.current = 0;
+    totalCoinsRef.current = 0;
+    unlockedLevelsRef.current = new Set([0]);
+    gameStartTimeRef.current = Date.now();
+    setNftTxDigest(null);
+    resetSubmitScore();
+    resetClaimTokens();
+    resetMintNFT();
+    setGameScreen(nextScreen);
+  };
 
   // ═══════════════════════════════════════
   // HELPER FUNCTIONS
@@ -1056,7 +1097,7 @@ const BorkaGame = () => {
           levelComplete();
         }
 
-        // Determine Boris state
+        // Determine Borka state
         if (player.alive) {
           if (!player.onGround && player.vy < -50) {
             player.state = 'jumping';
@@ -1648,106 +1689,220 @@ const BorkaGame = () => {
       style={{
         position: 'fixed',
         inset: 0,
-        background: '#1a0a2e',
+        background:
+          'radial-gradient(circle at top left, rgba(255,97,145,0.28), transparent 32%), radial-gradient(circle at 80% 20%, rgba(74,184,232,0.25), transparent 28%), linear-gradient(145deg, #12081d 0%, #1a0d2f 48%, #081923 100%)',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         fontFamily: '"Courier New", monospace',
         color: '#fff',
-        padding: '20px',
+        padding: '28px',
+        overflowY: 'auto',
       }}
     >
-      <h1
-        data-testid="title"
+      <div
         style={{
-          fontSize: '72px',
-          color: '#ff3366',
-          marginBottom: '20px',
-          textShadow: '0 0 20px #ff3366',
-          animation: 'pulse 2s infinite',
+          width: 'min(1180px, 100%)',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '28px',
+          alignItems: 'stretch',
         }}
       >
-        BORKA
-      </h1>
-      <p style={{ fontSize: '32px', color: '#ffd700', fontStyle: 'italic', marginBottom: '40px' }}>feat. Boris on OneChain</p>
-      <p
-        data-testid="warning-text"
-        style={{
-          fontSize: '24px',
-          color: '#ff6b35',
-          marginBottom: '40px',
-          animation: 'blink 1s infinite',
-          textAlign: 'center',
-        }}
-      >
-        ⚠ NOTHING IS AS IT SEEMS ⚠
-      </p>
-      <button
-        data-testid="play-button"
-        onClick={() => setGameScreen('worldmap')}
-        style={{
-          fontSize: '28px',
-          padding: '20px 60px',
-          background: 'linear-gradient(135deg, #e8892a, #c45e10)',
-          border: 'none',
-          borderRadius: '50px',
-          color: '#fff',
-          cursor: 'pointer',
-          fontWeight: 'bold',
-          boxShadow: '0 4px 20px rgba(232, 137, 42, 0.5)',
-          transition: 'transform 0.2s',
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-        onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-      >
-        PLAY
-      </button>
-      <WalletButton style={{ marginTop: '20px' }} />
-      {isConnected && (
-        <p style={{ color: '#1D9E75', fontSize: '14px', marginTop: '10px' }}>
-          Playing as {shortAddress}
-        </p>
-      )}
-      <div style={{ marginTop: '20px', textAlign: 'center' }}>
-        <p style={{ color: '#888', fontSize: '12px', marginBottom: '8px' }}>Choose your skin:</p>
-        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          {Object.values(SKINS).map((skin) => {
-            const isLocked = skin.nftRequired && !hasDevilNFT;
-            const isActive = activeSkin === skin.id;
-            return (
-              <button
-                key={skin.id}
-                onClick={() => {
-                  if (!isLocked) setActiveSkin(skin.id);
-                }}
-                title={isLocked ? 'Complete all 8 levels and mint the NFT to unlock' : skin.name}
+        <div
+          style={{
+            flex: '1 1 560px',
+            background: 'rgba(8, 12, 20, 0.72)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '32px',
+            padding: '36px',
+            boxShadow: '0 30px 90px rgba(0,0,0,0.35)',
+            backdropFilter: 'blur(12px)',
+          }}
+        >
+          <p style={{ color: '#6dd3ff', letterSpacing: '0.28em', fontSize: '12px', marginBottom: '18px' }}>
+            ONECHAIN OCT GAMEFI
+          </p>
+          <h1
+            data-testid="title"
+            style={{
+              fontSize: 'clamp(56px, 10vw, 104px)',
+              lineHeight: 0.95,
+              color: '#fff2e8',
+              marginBottom: '14px',
+              textShadow: '0 0 24px rgba(255,119,162,0.32)',
+            }}
+          >
+            BORKA
+          </h1>
+          <p style={{ fontSize: 'clamp(22px, 3vw, 34px)', color: '#ffb347', fontStyle: 'italic', marginBottom: '18px' }}>
+            the one-eyed chaos run
+          </p>
+          <p
+            data-testid="warning-text"
+            style={{
+              fontSize: '16px',
+              color: '#ff8f66',
+              marginBottom: '24px',
+              letterSpacing: '0.14em',
+            }}
+          >
+            NOTHING IS AS IT SEEMS
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '28px' }}>
+            {[
+              '8 handcrafted levels with fake floors, spikes, and gravity flips',
+              'On-chain leaderboard and score submission on OneChain testnet',
+              'Unlock Devil Borka NFT skin after clearing all levels',
+            ].map((feature) => (
+              <div
+                key={feature}
                 style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '50%',
-                  border: isActive ? '3px solid #ffd700' : '2px solid #444',
-                  background: isLocked ? '#1a1a1a' : skin.body,
-                  cursor: isLocked ? 'not-allowed' : 'pointer',
-                  opacity: isLocked ? 0.4 : 1,
-                  fontSize: '18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  transition: 'transform 0.1s',
-                  transform: isActive ? 'scale(1.15)' : 'scale(1)',
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: '18px',
+                  padding: '14px 16px',
+                  fontSize: '13px',
+                  lineHeight: 1.5,
+                  color: '#d7dfeb',
                 }}
               >
-                {isLocked ? '🔒' : ''}
-              </button>
-            );
-          })}
+                {feature}
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
+            <button
+              data-testid="play-button"
+              onClick={() => setGameScreen('worldmap')}
+              style={{
+                fontSize: '22px',
+                padding: '18px 42px',
+                background: 'linear-gradient(135deg, #ff8a3d, #ff4f88)',
+                border: 'none',
+                borderRadius: '999px',
+                color: '#fff',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                boxShadow: '0 16px 40px rgba(255, 90, 120, 0.32)',
+                transition: 'transform 0.2s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)')}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0) scale(1)')}
+            >
+              Enter The Run
+            </button>
+            <WalletButton />
+            {isConnected && (
+              <p style={{ color: '#1D9E75', fontSize: '14px' }}>
+                Wallet ready: {shortAddress}
+              </p>
+            )}
+          </div>
+          <div style={{ marginTop: '14px' }}>
+            <p style={{ color: '#9fb0c4', fontSize: '12px', marginBottom: '10px' }}>Choose your skin</p>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+              {Object.values(SKINS).map((skin) => {
+                const isLocked = skin.nftRequired && !hasDevilNFT;
+                const isActive = activeSkin === skin.id;
+                return (
+                  <button
+                    key={skin.id}
+                    onClick={() => {
+                      if (!isLocked) setActiveSkin(skin.id);
+                    }}
+                    title={isLocked ? 'Complete all 8 levels and mint the NFT to unlock' : skin.name}
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '50%',
+                      border: isActive ? '3px solid #ffd700' : '2px solid rgba(255,255,255,0.16)',
+                      background: isLocked ? '#1a1a1a' : skin.body,
+                      cursor: isLocked ? 'not-allowed' : 'pointer',
+                      opacity: isLocked ? 0.45 : 1,
+                      fontSize: '18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'transform 0.1s',
+                      transform: isActive ? 'scale(1.14)' : 'scale(1)',
+                    }}
+                  >
+                    {isLocked ? '🔒' : ''}
+                  </button>
+                );
+              })}
+            </div>
+            <p style={{ color: '#9fb0c4', fontSize: '12px', marginTop: '10px' }}>
+              {SKINS[activeSkin]?.name}
+              {activeSkin !== 'devil' && hasDevilNFT ? ' · Devil Borka unlocked' : ''}
+            </p>
+          </div>
         </div>
-        <p style={{ color: '#888', fontSize: '11px', marginTop: '6px' }}>
-          {SKINS[activeSkin]?.name}
-          {activeSkin !== 'devil' && hasDevilNFT ? ' · Devil Boris unlocked' : ''}
-        </p>
+        <div
+          style={{
+            flex: '1 1 360px',
+            minWidth: '300px',
+            background: 'linear-gradient(180deg, rgba(30, 36, 57, 0.92), rgba(9, 15, 25, 0.88))',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '32px',
+            padding: '28px',
+            boxShadow: '0 30px 90px rgba(0,0,0,0.35)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            gap: '20px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+            <div>
+              <p style={{ color: '#8dc8ff', fontSize: '12px', letterSpacing: '0.16em', marginBottom: '8px' }}>LIVE CHARACTER</p>
+              <p style={{ color: '#fff', fontSize: '28px', fontWeight: 'bold' }}>{SKINS[activeSkin]?.name}</p>
+            </div>
+            <img
+              src={publicAssetUrl('/2.png')}
+              alt="Borka character"
+              style={{ width: '132px', height: '132px', objectFit: 'contain', filter: 'drop-shadow(0 18px 25px rgba(74,184,232,0.32))' }}
+            />
+          </div>
+          <div
+            style={{
+              borderRadius: '24px',
+              background: 'linear-gradient(135deg, rgba(255,138,61,0.18), rgba(74,184,232,0.12))',
+              border: '1px solid rgba(255,255,255,0.08)',
+              padding: '18px',
+            }}
+          >
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginBottom: '14px' }}>
+              <img src={publicAssetUrl('/1')} alt="Devil Borka NFT art" style={{ width: '82px', height: '82px', objectFit: 'contain', borderRadius: '16px', background: 'rgba(255,255,255,0.08)', padding: '6px' }} />
+              <img src={publicAssetUrl('/2.png')} alt="Devil Borka alternate art" style={{ width: '82px', height: '82px', objectFit: 'contain', borderRadius: '16px', background: 'rgba(255,255,255,0.08)', padding: '6px' }} />
+            </div>
+            <p style={{ color: '#ffd36e', fontWeight: 'bold', textAlign: 'center', marginBottom: '6px' }}>Devil Borka NFT Reward</p>
+            <p style={{ color: '#d1dae8', fontSize: '13px', lineHeight: 1.5, textAlign: 'center' }}>
+              Beat all 8 levels, submit your score on-chain, then mint the exclusive Devil Borka skin to your wallet.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gap: '10px' }}>
+            {[
+              `Package ${'0x7c35...710d'}`,
+              'Leaderboard auto-refreshes on world map and during gameplay',
+              'NFT metadata uses on-chain image and thumbnail URLs',
+            ].map((detail) => (
+              <div
+                key={detail}
+                style={{
+                  borderRadius: '16px',
+                  background: 'rgba(255,255,255,0.05)',
+                  padding: '12px 14px',
+                  color: '#c9d3e0',
+                  fontSize: '12px',
+                }}
+              >
+                {detail}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
       <style>
         {`
@@ -1770,9 +1925,10 @@ const BorkaGame = () => {
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'linear-gradient(135deg, #1e5a3a 0%, #2a8a5a 40%, #1ab8cc 100%)',
+        background:
+          'radial-gradient(circle at top, rgba(255,214,102,0.18), transparent 25%), linear-gradient(155deg, #0f261d 0%, #133b3c 44%, #17365e 100%)',
         fontFamily: '"Courier New", monospace',
-        overflow: 'hidden',
+        overflowY: 'auto',
       }}
     >
       {/* Top bar */}
@@ -1782,12 +1938,15 @@ const BorkaGame = () => {
           top: 0,
           left: 0,
           right: 0,
-          height: '60px',
-          background: 'rgba(0,0,0,0.3)',
+          height: '72px',
+          background: 'rgba(5,10,16,0.58)',
+          backdropFilter: 'blur(10px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 20px',
+          padding: '0 24px',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          zIndex: 2,
         }}
       >
         <button
@@ -1804,9 +1963,12 @@ const BorkaGame = () => {
           🏠
         </button>
         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+          <div style={{ color: '#d6e6f5', fontSize: '13px', letterSpacing: '0.08em' }}>
+            Borka Route Map
+          </div>
           <div
             style={{
-              background: 'rgba(0,0,0,0.5)',
+              background: 'rgba(255,255,255,0.08)',
               padding: '8px 20px',
               borderRadius: '20px',
               color: '#ffd700',
@@ -1820,29 +1982,91 @@ const BorkaGame = () => {
         </div>
       </div>
 
-      {/* Level nodes */}
-      <div style={{ position: 'relative', width: '100%', height: '100%', padding: '80px' }}>
-        <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0 }}>
+      <div
+        style={{
+          width: 'min(1280px, 100%)',
+          margin: '100px auto 28px',
+          padding: '0 24px 24px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '20px',
+          alignItems: 'start',
+        }}
+      >
+        <div
+          style={{
+            background: 'rgba(7, 11, 20, 0.68)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '26px',
+            padding: '22px',
+            color: '#d8e2ef',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.24)',
+          }}
+        >
+          <p style={{ color: '#8cd7ff', fontSize: '12px', letterSpacing: '0.16em', marginBottom: '12px' }}>CURRENT RUN</p>
+          <h2 style={{ color: '#fff5de', fontSize: '28px', marginBottom: '12px' }}>Choose Your Level</h2>
+          <p style={{ fontSize: '13px', lineHeight: 1.6, color: '#bfc9d8', marginBottom: '18px' }}>
+            Follow the route, replay cleared stages, and push a better score to the on-chain leaderboard.
+          </p>
+          <div style={{ display: 'grid', gap: '10px' }}>
+            <div style={{ borderRadius: '18px', padding: '12px 14px', background: 'rgba(255,255,255,0.05)' }}>
+              <div style={{ color: '#ffd700', fontSize: '12px', marginBottom: '6px' }}>Selected</div>
+              <div style={{ color: '#fff', fontWeight: 'bold' }}>{LEVELS[currentLevelRef.current].name}</div>
+            </div>
+            <div style={{ borderRadius: '18px', padding: '12px 14px', background: 'rgba(255,255,255,0.05)' }}>
+              <div style={{ color: '#ffd700', fontSize: '12px', marginBottom: '6px' }}>Unlocked</div>
+              <div style={{ color: '#fff', fontWeight: 'bold' }}>{unlockedLevelsRef.current.size} / 8</div>
+            </div>
+            <div style={{ borderRadius: '18px', padding: '12px 14px', background: 'rgba(255,255,255,0.05)' }}>
+              <div style={{ color: '#ffd700', fontSize: '12px', marginBottom: '6px' }}>Skin</div>
+              <div style={{ color: '#fff', fontWeight: 'bold' }}>{SKINS[activeSkin]?.name}</div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            background: 'rgba(7, 11, 20, 0.66)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '30px',
+            padding: '18px',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.24)',
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              width: '100%',
+              maxWidth: '860px',
+              height: '460px',
+              margin: '0 auto',
+              borderRadius: '24px',
+              overflow: 'hidden',
+              background: 'linear-gradient(180deg, rgba(60,136,95,0.24), rgba(8,16,24,0.18))',
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}
+          >
+            <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0 }}>
           <path
-            d="M 100,400 Q 200,350 250,300 T 400,250 Q 500,200 600,180 T 750,150"
-            stroke="white"
+            d="M 85,380 Q 180,300 260,260 T 430,190 Q 560,130 690,170 T 805,300"
+            stroke="rgba(255,255,255,0.68)"
             strokeWidth="4"
             strokeDasharray="10,10"
             fill="none"
-            opacity="0.6"
+            opacity="0.75"
           />
         </svg>
 
         {LEVELS.map((level, idx) => {
           const positions = [
-            { x: 100, y: 400 },
-            { x: 250, y: 300 },
-            { x: 400, y: 250 },
-            { x: 550, y: 220 },
-            { x: 650, y: 200 },
-            { x: 700, y: 180 },
-            { x: 730, y: 160 },
-            { x: 750, y: 150 },
+            { x: 70, y: 350 },
+            { x: 190, y: 265 },
+            { x: 325, y: 210 },
+            { x: 470, y: 160 },
+            { x: 610, y: 150 },
+            { x: 710, y: 190 },
+            { x: 770, y: 245 },
+            { x: 805, y: 300 },
           ];
           const pos = positions[idx];
           const unlocked = unlockedLevelsRef.current.has(idx);
@@ -1866,8 +2090,8 @@ const BorkaGame = () => {
                 width: '60px',
                 height: '60px',
                 borderRadius: '50%',
-                background: unlocked ? '#fff' : '#666',
-                border: '4px solid #888',
+                background: unlocked ? 'linear-gradient(180deg, #fff6d8, #ffd36e)' : '#465063',
+                border: completed ? '4px solid #ffd36e' : '4px solid rgba(255,255,255,0.22)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -1875,7 +2099,7 @@ const BorkaGame = () => {
                 fontWeight: 'bold',
                 color: '#333',
                 cursor: unlocked ? 'pointer' : 'not-allowed',
-                boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                boxShadow: unlocked ? '0 14px 30px rgba(0,0,0,0.28)' : 'none',
                 transform: idx === currentLevelRef.current ? 'scale(1.2)' : 'scale(1)',
                 transition: 'transform 0.3s',
               }}
@@ -1886,18 +2110,18 @@ const BorkaGame = () => {
           );
         })}
 
-        {/* Current position Boris */}
+        {/* Current position Borka */}
         {currentLevelRef.current < LEVELS.length && (
           <div
             data-testid="boris-marker"
             style={{
               position: 'absolute',
               left:
-                [100, 250, 400, 550, 650, 700, 730, 750][
+                [70, 190, 325, 470, 610, 710, 770, 805][
                   Math.min(currentLevelRef.current, LEVELS.length - 1)
                 ] + 30,
               top:
-                [400, 300, 250, 220, 200, 180, 160, 150][
+                [350, 265, 210, 160, 150, 190, 245, 300][
                   Math.min(currentLevelRef.current, LEVELS.length - 1)
                 ] - 40,
               fontSize: '40px',
@@ -1907,68 +2131,82 @@ const BorkaGame = () => {
             🔵
           </div>
         )}
+          </div>
 
-        {/* Leaderboard in bottom left */}
-        <div style={{ position: 'absolute', bottom: '20px', left: '20px' }}>
-          <Leaderboard refreshKey={leaderboardRefreshKey} />
+          <div
+            style={{
+              marginTop: '18px',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '10px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <button
+              data-testid="restart-button"
+              onClick={() => {
+                currentLevelRef.current = 0;
+                totalDeathsRef.current = 0;
+                totalCoinsRef.current = 0;
+                unlockedLevelsRef.current = new Set([0]);
+                gameStartTimeRef.current = Date.now();
+                initLevel(0);
+                setGameScreen('playing');
+              }}
+              style={{
+                fontSize: '18px',
+                padding: '12px 30px',
+                background: 'linear-gradient(135deg, #e8892a, #c45e10)',
+                border: 'none',
+                borderRadius: '25px',
+                color: '#fff',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+              }}
+            >
+              Restart
+            </button>
+            <button
+              data-testid="next-button"
+              onClick={() => {
+                if (unlockedLevelsRef.current.has(currentLevelRef.current)) {
+                  initLevel(currentLevelRef.current);
+                  setGameScreen('playing');
+                }
+              }}
+              style={{
+                fontSize: '18px',
+                padding: '12px 40px',
+                background: 'linear-gradient(135deg, #ffd700, #ffaa00)',
+                border: 'none',
+                borderRadius: '25px',
+                color: '#000',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+              }}
+            >
+              Enter Level
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Bottom buttons */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '20px',
-          right: '20px',
-          display: 'flex',
-          gap: '10px',
-        }}
-      >
-        <button
-          data-testid="restart-button"
-          onClick={() => {
-            currentLevelRef.current = 0;
-            totalDeathsRef.current = 0;
-            totalCoinsRef.current = 0;
-            unlockedLevelsRef.current = new Set([0]);
-            gameStartTimeRef.current = Date.now();
-            initLevel(0);
-            setGameScreen('playing');
-          }}
-          style={{
-            fontSize: '18px',
-            padding: '12px 30px',
-            background: 'linear-gradient(135deg, #e8892a, #c45e10)',
-            border: 'none',
-            borderRadius: '25px',
-            color: '#fff',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-          }}
-        >
-          Restart
-        </button>
-        <button
-          data-testid="next-button"
-          onClick={() => {
-            if (unlockedLevelsRef.current.has(currentLevelRef.current)) {
-              initLevel(currentLevelRef.current);
-              setGameScreen('playing');
-            }
-          }}
-          style={{
-            fontSize: '18px',
-            padding: '12px 40px',
-            background: 'linear-gradient(135deg, #ffd700, #ffaa00)',
-            border: 'none',
-            borderRadius: '25px',
-            color: '#000',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-          }}
-        >
-          Next
-        </button>
+        <div style={{ minWidth: '280px' }}>
+          <Leaderboard refreshKey={leaderboardRefreshKey} />
+          <div
+            style={{
+              marginTop: '16px',
+              background: 'rgba(7, 11, 20, 0.68)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '24px',
+              padding: '18px',
+              color: '#d7dfeb',
+            }}
+          >
+            <p style={{ color: '#8cd7ff', fontSize: '12px', letterSpacing: '0.16em', marginBottom: '10px' }}>RUN TIPS</p>
+            <p style={{ fontSize: '13px', lineHeight: 1.6, marginBottom: '8px' }}>Scores post when you clear all 8 levels. The leaderboard auto-refreshes when you return here.</p>
+            <p style={{ fontSize: '13px', lineHeight: 1.6 }}>Need the NFT? Finish the run, then mint Devil Borka from the win screen using the connected wallet.</p>
+          </div>
+        </div>
       </div>
 
       <style>
@@ -1979,6 +2217,111 @@ const BorkaGame = () => {
           }
         `}
       </style>
+    </div>
+  );
+
+  const gameplayLeaderboard = (
+    <div
+      style={{
+        width: '100%',
+        maxWidth: '340px',
+        display: 'grid',
+        gap: '14px',
+      }}
+    >
+      <Leaderboard refreshKey={leaderboardRefreshKey} />
+      <div
+        style={{
+          background: 'rgba(9, 13, 20, 0.74)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: '20px',
+          padding: '16px',
+          color: '#c9d2dd',
+          fontFamily: '"Courier New", monospace',
+        }}
+      >
+        <p style={{ color: '#8cd7ff', fontSize: '12px', letterSpacing: '0.14em', marginBottom: '10px' }}>LIVE STATUS</p>
+        <p style={{ fontSize: '13px', marginBottom: '8px' }}>Skin: {SKINS[activeSkin]?.name}</p>
+        <p style={{ fontSize: '13px', marginBottom: '8px' }}>Wallet: {isConnected ? shortAddress : 'Not connected'}</p>
+        <p style={{ fontSize: '13px', lineHeight: 1.5 }}>Clear all levels to write your score on-chain and unlock the Devil Borka mint flow.</p>
+      </div>
+    </div>
+  );
+
+  const gameplayShell = (
+    <div
+      style={{
+        display: 'flex',
+        gap: '24px',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        width: '100%',
+      }}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {(gameScreen === 'playing' || gameScreen === 'levelComplete') && (
+          <div
+            data-testid="game-hud"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              width: 'min(800px, 100%)',
+              marginBottom: '10px',
+              fontFamily: '"Courier New", monospace',
+              fontSize: '18px',
+              color: '#fff',
+              gap: '12px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <span data-testid="level-name" style={{ color: '#ff3366', fontWeight: 'bold' }}>
+              {LEVELS[currentLevelRef.current].name}
+            </span>
+            <span data-testid="deaths-counter" style={{ color: '#ff6b35' }}>
+              💀 {displayDeaths}
+            </span>
+            <span data-testid="coins-counter" style={{ color: '#ffd700' }}>
+              🪙 {displayCoins}
+            </span>
+            {isConnected && (
+              <span style={{ color: '#1D9E75', fontSize: '14px' }}>
+                🔗 {shortAddress}
+              </span>
+            )}
+          </div>
+        )}
+        <canvas
+          data-testid="game-canvas"
+          ref={canvasRef}
+          width={CANVAS_WIDTH}
+          height={CANVAS_HEIGHT}
+          onTouchStart={handleCanvasTouch}
+          onTouchEnd={handleTouchEnd}
+          style={{
+            border: '3px solid #ff3366',
+            boxShadow: '0 0 30px rgba(255,51,102,0.6)',
+            background: '#000',
+            width: 'min(100%, 800px)',
+            height: 'auto',
+          }}
+        />
+        {(gameScreen === 'playing' || gameScreen === 'levelComplete') && (
+          <div
+            data-testid="controls-hint"
+            style={{
+              marginTop: '10px',
+              fontFamily: '"Courier New", monospace',
+              fontSize: '14px',
+              color: '#888',
+              textAlign: 'center',
+            }}
+          >
+            ← → / A D to move | Space / ↑ / W to jump | Double-jump enabled!
+          </div>
+        )}
+      </div>
+      {gameScreen !== 'win' && gameplayLeaderboard}
     </div>
   );
 
@@ -2017,15 +2360,7 @@ const BorkaGame = () => {
         </div>
         <button
           data-testid="play-again-button"
-          onClick={() => {
-            currentLevelRef.current = 0;
-            totalDeathsRef.current = 0;
-            totalCoinsRef.current = 0;
-            unlockedLevelsRef.current = new Set([0]);
-            gameStartTimeRef.current = Date.now();
-            setNftTxDigest(null);
-            setGameScreen('worldmap');
-          }}
+          onClick={() => resetRunState('worldmap')}
           style={{
             fontSize: '24px',
             padding: '15px 50px',
@@ -2039,6 +2374,22 @@ const BorkaGame = () => {
           }}
         >
           PLAY AGAIN
+        </button>
+        <button
+          onClick={() => resetRunState('intro')}
+          style={{
+            fontSize: '18px',
+            padding: '12px 36px',
+            background: 'transparent',
+            border: '2px solid #ffd700',
+            borderRadius: '50px',
+            color: '#ffd700',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            marginTop: '12px',
+          }}
+        >
+          HOME
         </button>
 
         {/* Blockchain claim section */}
@@ -2102,8 +2453,12 @@ const BorkaGame = () => {
         )}
         {isConnected && !hasDevilNFT && (
           <div style={{ marginTop: '20px', padding: '16px', border: '1px solid #cc0000', borderRadius: '12px', textAlign: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '12px' }}>
+              <img src="/1" alt="Devil Borka NFT art" style={{ width: '72px', height: '72px', objectFit: 'contain', borderRadius: '12px', background: 'rgba(255,255,255,0.08)', padding: '6px' }} />
+              <img src="/2.png" alt="Devil Borka NFT preview" style={{ width: '72px', height: '72px', objectFit: 'contain', borderRadius: '12px', background: 'rgba(255,255,255,0.08)', padding: '6px' }} />
+            </div>
             <p style={{ color: '#ffd700', fontWeight: 'bold', marginBottom: '8px' }}>
-              😈 You unlocked Devil Boris!
+              😈 You unlocked Devil Borka!
             </p>
             <p style={{ color: '#888', fontSize: '12px', marginBottom: '12px' }}>
               Mint your exclusive NFT skin to your wallet
@@ -2123,11 +2478,11 @@ const BorkaGame = () => {
                   fontWeight: 'bold',
                 }}
               >
-                {isMintingNFT ? '⏳ Minting...' : '🎨 Mint Devil Boris NFT'}
+                {isMintingNFT ? '⏳ Minting...' : '🎨 Mint Devil Borka NFT'}
               </button>
             ) : (
               <div>
-                <p style={{ color: '#1D9E75', fontWeight: 'bold' }}>✅ Devil Boris NFT Minted!</p>
+                <p style={{ color: '#1D9E75', fontWeight: 'bold' }}>✅ Devil Borka NFT Minted!</p>
                 <a
                   href={explorerTxUrl(nftTxDigest)}
                   target="_blank"
@@ -2142,8 +2497,15 @@ const BorkaGame = () => {
         )}
         {isConnected && hasDevilNFT && (
           <p style={{ color: '#cc0000', fontSize: '13px', marginTop: '12px' }}>
-            😈 Devil Boris NFT already in your wallet
+            😈 Devil Borka NFT already in your wallet
           </p>
+        )}
+        {(submitScoreError || claimTokensError || mintNftError) && (
+          <div style={{ marginTop: '12px', color: '#ff8a8a', fontSize: '12px', maxWidth: '420px' }}>
+            {submitScoreError && <p style={{ margin: '4px 0' }}>Score error: {submitScoreError}</p>}
+            {claimTokensError && <p style={{ margin: '4px 0' }}>Claim error: {claimTokensError}</p>}
+            {mintNftError && <p style={{ margin: '4px 0' }}>NFT error: {mintNftError}</p>}
+          </div>
         )}
         {!isConnected && (
           <div style={{ marginTop: '16px' }}>
@@ -2174,70 +2536,11 @@ const BorkaGame = () => {
             alignItems: 'center',
             justifyContent: 'center',
             minHeight: '100vh',
-            background: '#0a0a0a',
+            background: 'radial-gradient(circle at top, rgba(255,51,102,0.18), transparent 28%), linear-gradient(180deg, #080b12 0%, #121824 100%)',
             padding: '20px',
           }}
         >
-          {/* HUD — only shown during active gameplay */}
-          {(gameScreen === 'playing' || gameScreen === 'levelComplete') && (
-            <div
-              data-testid="game-hud"
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                width: '800px',
-                marginBottom: '10px',
-                fontFamily: '"Courier New", monospace',
-                fontSize: '18px',
-                color: '#fff',
-              }}
-            >
-              <span data-testid="level-name" style={{ color: '#ff3366', fontWeight: 'bold' }}>
-                {LEVELS[currentLevelRef.current].name}
-              </span>
-              <span data-testid="deaths-counter" style={{ color: '#ff6b35' }}>
-                💀 {displayDeaths}
-              </span>
-              <span data-testid="coins-counter" style={{ color: '#ffd700' }}>
-                🪙 {displayCoins}
-              </span>
-              {isConnected && (
-                <span style={{ color: '#1D9E75', fontSize: '14px' }}>
-                  🔗 {shortAddress}
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Canvas — always mounted for playing/levelComplete/win so canvasRef stays valid */}
-          <canvas
-            data-testid="game-canvas"
-            ref={canvasRef}
-            width={CANVAS_WIDTH}
-            height={CANVAS_HEIGHT}
-            onTouchStart={handleCanvasTouch}
-            onTouchEnd={handleTouchEnd}
-            style={{
-              border: '3px solid #ff3366',
-              boxShadow: '0 0 30px rgba(255,51,102,0.6)',
-              background: '#000',
-            }}
-          />
-
-          {/* Controls hint — only shown during active gameplay */}
-          {(gameScreen === 'playing' || gameScreen === 'levelComplete') && (
-            <div
-              data-testid="controls-hint"
-              style={{
-                marginTop: '10px',
-                fontFamily: '"Courier New", monospace',
-                fontSize: '14px',
-                color: '#888',
-              }}
-            >
-              ← → / A D to move | Space / ↑ / W to jump | Double-jump enabled!
-            </div>
-          )}
+          {gameplayShell}
         </div>
       )}
       {gameScreen === 'win' && renderWinScreen()}

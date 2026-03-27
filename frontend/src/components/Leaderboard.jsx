@@ -18,6 +18,11 @@ export default function Leaderboard({ refreshKey = 0 }) {
     load();
   }, [refreshKey]);
 
+  useEffect(() => {
+    const intervalId = window.setInterval(load, 8000);
+    return () => window.clearInterval(intervalId);
+  }, [refreshKey]);
+
   if (!LEADERBOARD_ID) {
     return (
       <div style={containerStyle}>

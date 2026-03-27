@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useSignAndExecuteTransaction } from '@onelabs/dapp-kit';
 import { Transaction } from '@onelabs/sui/transactions';
-import { PACKAGE_ID, LEADERBOARD_ID, MINT_REGISTRY_ID, suiClient } from '../lib/onechain';
+import { PACKAGE_ID, LEADERBOARD_ID, MINT_REGISTRY_ID, publicAssetUrl, suiClient } from '../lib/onechain';
 
 export function useSubmitScore() {
   const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction();
@@ -9,6 +9,8 @@ export function useSubmitScore() {
   const [error, setError] = useState(null);
 
   const submitScore = useCallback(({ coins, deaths, timeMs }) => {
+    setError(null);
+    setTxDigest(null);
     if (!PACKAGE_ID || !LEADERBOARD_ID) {
       setError('Contract not configured');
       return;
@@ -32,7 +34,12 @@ export function useSubmitScore() {
     );
   }, [signAndExecute]);
 
-  return { submitScore, isPending, txDigest, error };
+  const reset = useCallback(() => {
+    setTxDigest(null);
+    setError(null);
+  }, []);
+
+  return { submitScore, isPending, txDigest, error, reset };
 }
 
 export function useClaimTokens() {
@@ -41,6 +48,8 @@ export function useClaimTokens() {
   const [error, setError] = useState(null);
 
   const claimTokens = useCallback(({ coins }) => {
+    setError(null);
+    setTxDigest(null);
     if (!PACKAGE_ID || !LEADERBOARD_ID) {
       setError('Contract not configured');
       return;
@@ -62,7 +71,12 @@ export function useClaimTokens() {
     );
   }, [signAndExecute]);
 
-  return { claimTokens, isPending, txDigest, error };
+  const reset = useCallback(() => {
+    setTxDigest(null);
+    setError(null);
+  }, []);
+
+  return { claimTokens, isPending, txDigest, error, reset };
 }
 
 export function useMintDevilBoris() {
@@ -71,14 +85,26 @@ export function useMintDevilBoris() {
   const [error, setError] = useState(null);
 
   const mintNFT = useCallback(() => {
+    setError(null);
+    setTxDigest(null);
     if (!PACKAGE_ID || !MINT_REGISTRY_ID) {
       setError('Contract not configured');
       return;
     }
+    const name = 'Devil Borka';
+    const description = 'Exclusive Devil Borka skin NFT unlocked after beating all 8 BORKA levels.';
+    const imageUrl = publicAssetUrl('/1');
+    const thumbnailUrl = publicAssetUrl('/2.png');
     const tx = new Transaction();
     tx.moveCall({
-      target: `${PACKAGE_ID}::borka_game::mint_devil_boris`,
-      arguments: [tx.object(MINT_REGISTRY_ID)],
+      target: `${PACKAGE_ID}::borka_game::mint_devil_borka`,
+      arguments: [
+        tx.object(MINT_REGISTRY_ID),
+        tx.pure.string(name),
+        tx.pure.string(description),
+        tx.pure.string(imageUrl),
+        tx.pure.string(thumbnailUrl),
+      ],
     });
     signAndExecute(
       { transaction: tx },
@@ -89,7 +115,12 @@ export function useMintDevilBoris() {
     );
   }, [signAndExecute]);
 
-  return { mintNFT, isPending, txDigest, error };
+  const reset = useCallback(() => {
+    setTxDigest(null);
+    setError(null);
+  }, []);
+
+  return { mintNFT, isPending, txDigest, error, reset };
 }
 
 export async function checkDevilBorisNFT(address) {
@@ -98,7 +129,7 @@ export async function checkDevilBorisNFT(address) {
     const objects = await suiClient.getOwnedObjects({
       owner: address,
       filter: {
-        StructType: `${PACKAGE_ID}::borka_game::BorisSkinNFT`,
+        StructType: `${PACKAGE_ID}::borka_game::BorkaSkinNFT`,
       },
       options: { showContent: true },
     });

@@ -4,6 +4,7 @@ module borka_game::borka_game {
     use one::object::{Self, UID};
     use one::transfer;
     use one::tx_context::{Self, TxContext};
+    use std::string::String;
 
     public struct ScoreSubmitted has copy, drop {
         player: address,
@@ -35,10 +36,14 @@ module borka_game::borka_game {
         max_entries: u64,
     }
 
-    public struct BorisSkinNFT has key, store {
+    public struct BorkaSkinNFT has key, store {
         id: UID,
         skin_id: u64,
         owner: address,
+        name: String,
+        description: String,
+        image_url: String,
+        thumbnail_url: String,
     }
 
     public struct MintRegistry has key {
@@ -111,7 +116,14 @@ module borka_game::borka_game {
         });
     }
 
-    public entry fun mint_devil_boris(registry: &mut MintRegistry, ctx: &mut TxContext) {
+    public entry fun mint_devil_borka(
+        registry: &mut MintRegistry,
+        name: String,
+        description: String,
+        image_url: String,
+        thumbnail_url: String,
+        ctx: &mut TxContext,
+    ) {
         let player = tx_context::sender(ctx);
 
         let mut i = 0;
@@ -124,10 +136,14 @@ module borka_game::borka_game {
 
         vector::push_back(&mut registry.minted, player);
 
-        let nft = BorisSkinNFT {
+        let nft = BorkaSkinNFT {
             id: object::new(ctx),
             skin_id: 4,
             owner: player,
+            name,
+            description,
+            image_url,
+            thumbnail_url,
         };
         transfer::transfer(nft, player);
 
