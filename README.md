@@ -1,297 +1,417 @@
-# BORKA
+<div align="center">
 
-BORKA is a browser platformer with optional OneChain integration.
+# 🎮 BORKA — GameFi on OneChain
 
-This README is written to match the current repository state and deployed contract. It is intended as a human-maintained project document, not a generated promo page. If the code changes, this file should be updated with the same standard: describe what is actually implemented, what is deployed, and what still requires manual operation.
+> *A deceptive little platformer that rewards skill, punishes trust, and records your glory permanently on the blockchain.*
 
-## What This Project Is
+![Banner](./frontend/public/Gemini_Generated_Image_9bnpnh9bnpnh9bnp.png)
 
-The project has two parts:
+[![OneChain Testnet](https://img.shields.io/badge/OneChain-Testnet-1D9E75?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0wIDE4Yy00LjQyIDAtOC0zLjU4LTgtOHMzLjU4LTggOC04IDggMy41OCA4IDgtMy41OCA4LTggOHoiLz48L3N2Zz4=)](https://onescan.cc/testnet)
+[![Built with React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)](https://react.dev)
+[![Move Smart Contract](https://img.shields.io/badge/Smart%20Contract-Move-FF9900?style=for-the-badge)](https://move-language.github.io/move/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](./LICENSE)
 
-1. A React frontend in `frontend/`
-2. A Move smart contract in `contracts/`
+</div>
 
-The frontend runs as a single-screen canvas platformer with wallet connection, leaderboard display, score submission, and a separate on-chain claim action. The contract stores leaderboard entries on OneChain testnet in a shared object.
+---
 
-## Current Deployed Contract
+## 👾 What is BORKA?
 
-The current frontend is configured for this deployed testnet package:
+BORKA is a browser-based platformer that lives at the intersection of retro arcade fun and modern blockchain technology. You play as **Borka** — a deceptively cute creature navigating 8 increasingly evil levels packed with traps, fake platforms, gravity flips, and closing walls.
 
-- Package ID: `0x72c3ef7bfb2ece4ac9b919fdd9d5660625ea4aec9a0e402d4eea85bb26061808`
-- Leaderboard ID: `0x4f9151213ed94e92dd7ea1995b6763a4b845dd0d99779c26593b35c58a19c748`
-- Publish transaction digest: `2MQPAYTR2ETxASJVoPGc4b1Lh395H49ZhZi2cDN4XQsx`
+But here's the twist: **your score lives forever on the blockchain.** Beat all 8 levels with a wallet connected and your run is submitted on-chain — coins collected, deaths, time — immutable and public for everyone to see on the OneChain Testnet Leaderboard.
 
-These values are already set in `frontend/.env`.
+Win it all and you unlock the exclusive **Devil Borka NFT skin**, minted directly to your wallet.
 
-## Tech Stack
+<div align="center">
 
-- Frontend: React 18, CRACO, Canvas API
-- Wallet / chain client: `@onelabs/dapp-kit`, `@onelabs/sui`
-- Smart contract: Move on OneChain
-- Network target: OneChain testnet
+![Home Screen](./frontend/public/home.png)
+*The BORKA home screen — connect your wallet and dive in.*
 
-## Repository Layout
+</div>
 
-```text
-.
-├── contracts/
-│   ├── Move.toml
-│   └── sources/
-│       └── borka_game.move
-├── frontend/
-│   ├── .env
-│   ├── package.json
-│   └── src/
-│       ├── components/
-│       ├── contexts/
-│       ├── hooks/
-│       └── lib/
-├── DEPLOYMENT_GUIDE.md
-└── README.md
+---
+
+## 🧑‍🎨 Meet the Characters
+
+<div align="center">
+
+| Devil Borka (NFT Skin) | Borka 2 | Borka 3 |
+|:---:|:---:|:---:|
+| ![Devil Borka](./frontend/public/1) | ![Borka 2](./frontend/public/2.png) | ![Borka 3](./frontend/public/3.png) |
+| Unlocked by beating all 8 levels & minting the NFT | Classic skin variant | Fire variant |
+
+</div>
+
+The **Devil Borka** skin is special — it's not just cosmetic. It's an on-chain NFT (`BorkaSkinNFT`) minted directly to your wallet after you conquer all 8 levels. One mint per wallet address, enforced by the smart contract.
+
+---
+
+## 🕹️ Gameplay
+
+<div align="center">
+
+![Gameplay](./frontend/public/gameplay.png)
+*Mid-run on Level 4 — platforms are moving, spikes incoming.*
+
+</div>
+
+### Controls
+
+| Action | Keys |
+|--------|------|
+| Move Left | `←` / `A` |
+| Move Right | `→` / `D` |
+| Jump | `Space` / `↑` / `W` |
+| Double Jump | Press jump again mid-air |
+
+### The Core Loop
+
+```
+Start → Choose Level → Survive Traps → Collect Coins → Reach Exit
+        ↑                                                       ↓
+        └──────────────── Die, Respawn, Try Again ←────────────┘
+
+After Level 8: Score submitted on-chain → Claim Reward → Mint NFT
 ```
 
-## Local Setup
+### Scoring Formula
 
-### Frontend
+```
+Final Score = (Coins × 100) − (Deaths × 50)
+```
+
+Time is also tracked and stored on-chain. The more coins you grab and the fewer times you die, the higher you climb the leaderboard.
+
+<div align="center">
+
+![Result Screen](./frontend/public/result.png)
+*Win screen — score on-chain, claim your OCT reward, and mint the Devil Borka NFT.*
+
+</div>
+
+---
+
+## 🗺️ The 8 Levels
+
+<div align="center">
+
+![Level Select](./frontend/public/level.png)
+*The world map — track your progress across all 8 stages and jump back into any unlocked level.*
+
+</div>
+
+Each level has a personality — and a nasty surprise.
+
+| # | Name | Signature Mechanic |
+|---|------|-------------------|
+| 1 | **Easy?** | Floor drops away under your feet mid-run |
+| 2 | **Watch Your Step** | Rising spikes and moving spike hazards |
+| 3 | **Trust Issues** | Fake platforms that fall when you land |
+| 4 | **Keep Moving** | Moving platforms shifting in all directions |
+| 5 | **Down Is Up** | Gravity reverses when you cross a trigger zone |
+| 6 | **Speed Run** | Every platform crumbles the moment you touch it |
+| 7 | **Closing In** | A wall drives you forward while spikes drop from the ceiling |
+| 8 | **Devil's Den** | All of the above. At the same time. Good luck. |
+
+Every level has 7 coins hidden across the route. Coin-hunting is dangerous but the leaderboard rewards it.
+
+---
+
+## ⛓️ OneChain & Smart Contract
+
+### Why OneChain?
+
+BORKA runs on [OneChain](https://onelabs.cc) — a high-performance, Move-based blockchain network. We chose it because:
+
+- **Instant finality** — score submissions confirm in seconds
+- **Move language** — type-safe, resource-oriented smart contracts
+- **Low fees** — players can submit scores and mint NFTs without worrying about gas costs
+- **OneWallet compatible** — seamless browser wallet experience
+
+### Deployed Contract — Testnet
+
+| Object | Address |
+|--------|---------|
+| 📦 **Package ID** | `0x7c358897ac2c98bed32a1f3148e99e7e6b5aee9ca8be671988a353682e31710d` |
+| 🏆 **Leaderboard Object** | `0xb327c4cce2fea39c812692a9df63742aa2582a83e6c0955da6c4506849de2987` |
+| 🎨 **Mint Registry Object** | `0x5823bdfdf319242d19fcaf4fb41cd7eb89c91b8673007fda8ff0361d1e6c7c96` |
+| 🌐 **Network** | OneChain Testnet |
+| 🔍 **Explorer** | [onescan.cc/testnet](https://onescan.cc/testnet) |
+
+> View the contract live on the explorer by searching any of the addresses above at [onescan.cc/testnet](https://onescan.cc/testnet).
+
+---
+
+## 📜 Smart Contract Architecture
+
+The contract is written in **Move** and lives at `contracts/sources/borka_game.move`.
+
+### Shared On-Chain Objects
+
+```
+Package Init
+    ├── Leaderboard (shared) ── stores up to 100 ScoreEntry records
+    └── MintRegistry (shared) ── tracks which wallets have minted the NFT
+```
+
+### Stored Data Types
+
+```move
+struct ScoreEntry has store, copy, drop {
+    player:  address,   // wallet address
+    coins:   u64,       // coins collected across all 8 levels
+    deaths:  u64,       // total deaths in the run
+    time_ms: u64,       // total elapsed time in milliseconds
+}
+
+struct BorkaSkinNFT has key, store {
+    id:            UID,
+    skin_id:       u64,    // 4 = Devil Borka
+    owner:         address,
+    name:          String,
+    description:   String,
+    image_url:     String,
+    thumbnail_url: String,
+}
+```
+
+### Entry Functions
+
+#### `submit_score` — Record your run on-chain
+```move
+public entry fun submit_score(
+    board:   &mut Leaderboard,
+    coins:   u64,
+    deaths:  u64,
+    time_ms: u64,
+    ctx:     &mut TxContext,
+)
+```
+- Reads the caller address from `TxContext`
+- Removes any previous entry from the same wallet (one entry per address)
+- Caps total entries at 100
+- Pushes the new score and emits a `ScoreSubmitted` event
+
+#### `claim_tokens` — Record your reward claim on-chain
+```move
+public entry fun claim_tokens(
+    board: &mut Leaderboard,
+    ctx:   &mut TxContext,
+)
+```
+- Emits a `TokensClaimed` event with `amount: 1`
+- This is an on-chain proof-of-claim record. Actual OCT delivery is handled off-chain.
+
+#### `mint_devil_borka` — Mint your exclusive NFT
+```move
+public entry fun mint_devil_borka(
+    registry:      &mut MintRegistry,
+    name:          String,
+    description:   String,
+    image_url:     String,
+    thumbnail_url: String,
+    ctx:           &mut TxContext,
+)
+```
+- Checks the registry: **one mint per wallet, enforced on-chain** — trying to mint twice aborts with error
+- Creates a `BorkaSkinNFT` object and transfers it to the caller
+- Emits an `NftMinted` event
+
+### On-Chain Events
+
+| Event | Triggered By | Fields |
+|-------|-------------|--------|
+| `ScoreSubmitted` | `submit_score` | `player`, `coins`, `deaths`, `time_ms` |
+| `TokensClaimed` | `claim_tokens` | `player`, `amount` |
+| `NftMinted` | `mint_devil_borka` | `player`, `skin_id` |
+
+---
+
+## 🔗 Frontend Chain Integration
+
+The blockchain layer is cleanly separated from the game engine:
+
+```
+src/
+├── lib/onechain.js          ← RPC URL, package/object IDs, helper functions
+├── hooks/useOneChain.js     ← Transaction builders (submit_score, claim_tokens, mint_devil_borka)
+├── components/Leaderboard.jsx ← Reads leaderboard object, sorts & renders top 10
+└── contexts/WalletContext.js  ← Wallet connect/disconnect state
+```
+
+The game can be played completely without a wallet. Blockchain features (score submission, claim, NFT mint) are presented only when a wallet is connected.
+
+---
+
+## 🚀 Getting Started
+
+### Play Locally
 
 ```bash
+# Clone the repo
+git clone https://github.com/your-org/Borka-OneChain.git
+cd Borka-OneChain
+
+# Install frontend dependencies
 cd frontend
 npm install
+
+# Start the dev server
 npm start
 ```
 
-Production build:
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+> **First time?** Install [OneWallet](https://onelabs.cc) browser extension and switch to Testnet before connecting.
+
+### Production Build
 
 ```bash
 cd frontend
 npm run build
+# Output is in frontend/build/ — ready to deploy to any static host
 ```
 
-### Contract
+### Environment Variables
 
-You need a working `one` CLI binary.
-
-Build the package:
-
-```bash
-cd contracts
-one move build --force
-```
-
-Publish with the active OneChain wallet:
-
-```bash
-cd contracts
-one client publish --gas-budget 500000000
-```
-
-After publishing, copy the new package ID and shared leaderboard object ID into `frontend/.env`.
-
-## Environment Variables
-
-The frontend currently uses:
+The `.env` in `frontend/` is pre-configured for the deployed testnet contract:
 
 ```env
+REACT_APP_BACKEND_URL=https://borka-game.preview.emergentagent.com
 REACT_APP_ONECHAIN_RPC=https://rpc-testnet.onelabs.cc:443
 REACT_APP_ONECHAIN_NETWORK=testnet
 REACT_APP_ONECHAIN_EXPLORER=https://onescan.cc/testnet
-REACT_APP_PACKAGE_ID=0x72c3ef7bfb2ece4ac9b919fdd9d5660625ea4aec9a0e402d4eea85bb26061808
-REACT_APP_LEADERBOARD_ID=0x4f9151213ed94e92dd7ea1995b6763a4b845dd0d99779c26593b35c58a19c748
-GENERATE_SOURCEMAP=false
+
+REACT_APP_PACKAGE_ID=0x7c358897ac2c98bed32a1f3148e99e7e6b5aee9ca8be671988a353682e31710d
+REACT_APP_LEADERBOARD_ID=0xb327c4cce2fea39c812692a9df63742aa2582a83e6c0955da6c4506849de2987
+REACT_APP_MINT_REGISTRY_ID=0x5823bdfdf319242d19fcaf4fb41cd7eb89c91b8673007fda8ff0361d1e6c7c96
 ```
 
-## Gameplay Flow
+### Re-Deploying the Contract
 
-The game is a level-based platformer. The player controls Boris and moves through 8 levels in sequence.
+```bash
+# Build
+cd contracts
+one move build --force
 
-Core loop:
+# Publish
+one client publish --gas-budget 500000000
+```
 
-1. Start at the intro screen.
-2. Choose a level or begin from level 1.
-3. Move with arrow keys or `A` / `D`.
-4. Jump with `Space`, `W`, or `ArrowUp`.
-5. Survive traps, reach the exit door, and collect coins on the way.
-6. On level completion, the next level unlocks.
-7. After level 8, the game enters the win state.
-8. If a wallet is connected, the frontend submits the final run to chain.
+After publishing, update the three `REACT_APP_*_ID` values in `frontend/.env` and rebuild.
 
-The player can still play the game without a wallet. Wallet connection only affects blockchain features.
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for the full step-by-step walkthrough including wallet import and CLI setup.
 
-## Level Flow
+---
 
-The 8 levels currently implemented are:
+## 🔭 Future Scope
 
-1. `Easy?` - introduces floor-drop traps
-2. `Watch Your Step` - introduces spikes and moving hazards
-3. `Trust Issues` - introduces fake platforms
-4. `Keep Moving` - introduces moving platforms
-5. `Down Is Up` - introduces gravity flip behavior
-6. `Speed Run` - increases tempo with collapsing sections
-7. `Closing In` - introduces pressure from moving wall logic
-8. `Devil's Den` - combines previous mechanics
+BORKA v1 is just the beginning. Here's where we're taking this:
 
-The game logic, trap handling, level transitions, and render loop are all in `frontend/src/components/BorkaGame.jsx`.
+### 🌐 Multiplayer — Race to the Finish
+> Real-time head-to-head platformer races. Two wallets, same level, same traps — first to the exit wins. All race outcomes recorded on-chain.
 
-## Scoring
+- Live presence via WebSocket relay
+- On-chain wager and reward distribution through a dedicated `race_escrow` contract
+- Spectator mode with live leaderboard updates
 
-The frontend computes leaderboard score as:
+### 🤖 AI vs. Humans
+> Train a reinforcement learning agent on BORKA's trap patterns, then let players challenge it.
+
+- AI agent runs the same levels with the same physics
+- Human scores compared against AI benchmark scores on-chain
+- Special "Beat the Bot" NFT for players who outperform the AI
+
+### 🗺️ 100+ Unique Levels
+> Currently 8 levels. The roadmap expands to **100+ procedurally-enhanced levels** with:
+
+| Feature | Description |
+|---------|-------------|
+| **New Trap Types** | Laser beams, teleporters, wind zones, ice physics |
+| **Environmental Hazards** | Lava floors, flood timers, collapsing ceilings |
+| **Boss Encounters** | End-of-world bosses with multi-phase attack patterns |
+| **Level Editor** | Community-created levels submitted on-chain as Move objects |
+| **Daily Challenge Levels** | Rotating single-life levels with OCT jackpot rewards |
+
+### 🏅 On-Chain Token Economy
+> A proper `$OCT` reward distribution contract:
+
+- Smart contract treasury holds reward pool
+- `claim_tokens` evolves to trigger real `$OCT` transfers
+- Seasonal ranked seasons with on-chain prize distribution
+- Staking mechanism: lock `$OCT` to unlock exclusive skins
+
+### 🎮 Platform Expansion
+- **Mobile** — Touch-optimized layout already partially built
+- **Controller support** — Gamepad API integration
+- **Embedded Twitch/YouTube** — Stream with live wallet leaderboard overlay
+
+---
+
+## 🗂️ Repository Layout
 
 ```text
-score = (coins * 100) - (deaths * 50)
+Borka-OneChain/
+├── contracts/
+│   ├── Move.toml                    ← Package manifest
+│   └── sources/
+│       └── borka_game.move          ← The smart contract
+├── frontend/
+│   ├── .env                         ← Contract addresses & RPC config
+│   ├── public/
+│   │   ├── 1                        ← Devil Borka NFT art
+│   │   ├── 2.png                    ← Borka character skin 2
+│   │   └── 3.png                    ← Borka character skin 3
+│   └── src/
+│       ├── components/
+│       │   ├── BorkaGame.jsx        ← Main game engine + all screens
+│       │   ├── Leaderboard.jsx      ← On-chain leaderboard component
+│       │   └── WalletButton.jsx     ← Wallet connect/disconnect UI
+│       ├── contexts/
+│       │   └── WalletContext.js     ← Wallet state provider
+│       ├── hooks/
+│       │   └── useOneChain.js       ← Transaction hooks + leaderboard fetch
+│       └── lib/
+│           └── onechain.js          ← Chain config & utility functions
+├── DEPLOYMENT_GUIDE.md
+└── README.md
 ```
 
-What is tracked during a run:
+---
 
-- Total collected coins
-- Total deaths
-- Completion time in milliseconds
+## 🙋 FAQ
 
-When the player finishes the final level with a connected wallet, the frontend calls:
+**Q: Do I need a wallet to play?**  
+A: No. You can play all 8 levels without a wallet. You just won't be able to save your score to the leaderboard or mint the NFT.
 
-- `submit_score(coins, deaths, time_ms)`
+**Q: What wallet do I need?**  
+A: [OneWallet](https://onelabs.cc) — a browser extension wallet for OneChain. Switch it to Testnet before connecting.
 
-The leaderboard UI then reads the shared leaderboard object and sorts entries locally by the same computed score.
+**Q: Is this on mainnet?**  
+A: Currently on OneChain Testnet. No real tokens are required.
 
-## Wallet Flow
+**Q: The leaderboard shows empty — is that a bug?**  
+A: If nobody has posted a score yet, it genuinely will be empty. If you see a "Could not load" error, your RPC connection may be failing — hit the Retry button.
 
-The current wallet flow is simple:
+**Q: I got "User rejected the request" — what happened?**  
+A: That just means you closed the wallet popup without signing. Click the button again and approve in your wallet.
 
-1. The app asks `@onelabs/dapp-kit` for available wallets.
-2. Clicking the wallet button connects the first available wallet.
-3. Disconnecting is done from the same button.
-4. When connected, the button shows the short wallet address.
+**Q: Can I mint the Devil Borka NFT twice?**  
+A: No. The `MintRegistry` contract enforces one mint per wallet address. A second attempt will fail with an on-chain assertion error.
 
-The frontend expects a OneWallet-compatible browser wallet on OneChain testnet.
+---
 
-## Smart Contract Design
+## 👥 Credits
 
-The Move contract lives in `contracts/sources/borka_game.move`.
+Built with ❤️ on OneChain for the **GameFi ecosystem**.
 
-The module creates one shared `Leaderboard` object during package initialization.
+- **Game Engine**: Custom Canvas API platformer — zero external game library dependencies
+- **Blockchain**: OneChain Move smart contracts + `@onelabs/dapp-kit`
+- **UI**: React 18 + pure CSS (no component library)
 
-### Stored Types
+---
 
-`ScoreEntry`
+## 📄 License
 
-- `player: address`
-- `coins: u64`
-- `deaths: u64`
-- `time_ms: u64`
-
-`Leaderboard`
-
-- `id: UID`
-- `entries: vector<ScoreEntry>`
-- `max_entries: u64`
-
-### Initialization
-
-When the package is published, `init` creates a `Leaderboard` object and shares it on-chain.
-
-That shared object is the object configured in `REACT_APP_LEADERBOARD_ID`.
-
-### `submit_score`
-
-Signature:
-
-```move
-public fun submit_score(
-    board: &mut Leaderboard,
-    coins: u64,
-    deaths: u64,
-    time_ms: u64,
-    ctx: &mut TxContext,
-)
-```
-
-Behavior:
-
-- Reads the transaction sender from `TxContext`
-- Creates a new `ScoreEntry`
-- Removes the sender's previous entry if one already exists
-- Caps storage to `max_entries`
-- Pushes the new entry into the leaderboard
-
-Important detail:
-
-- The contract stores raw run data
-- The sorting formula is applied in the frontend when rendering the leaderboard
-
-### `claim_tokens`
-
-Signature:
-
-```move
-public fun claim_tokens(
-    board: &mut Leaderboard,
-    coins: u64,
-    ctx: &mut TxContext,
-)
-```
-
-Current behavior:
-
-- Executes an on-chain call
-- Does not transfer OCT
-- Acts only as a proof-of-claim transaction pattern
-
-This means the current repo does not contain an on-chain reward distribution system. Any real token reward logic would need additional contract or backend infrastructure.
-
-## Frontend Chain Integration
-
-Chain access is split across these files:
-
-- `frontend/src/lib/onechain.js`
-  Defines RPC URL, package ID, leaderboard ID, explorer URL, and score helper.
-
-- `frontend/src/hooks/useOneChain.js`
-  Builds and signs transactions for `submit_score` and `claim_tokens`, and fetches the leaderboard object.
-
-- `frontend/src/components/Leaderboard.jsx`
-  Loads the shared object from chain and renders the top entries.
-
-- `frontend/src/contexts/WalletContext.js`
-  Holds connected wallet state for the app.
-
-## What Is Actually Implemented
-
-Implemented now:
-
-- Playable 8-level browser game
-- Keyboard and touch input support
-- Wallet connect / disconnect button
-- Automatic score submission after final level completion if a wallet is connected
-- On-chain shared leaderboard object
-- Manual claim transaction call
-- Frontend build that compiles successfully
-- Contract build and publish flow that works against OneChain testnet
-
-Not implemented in this repo:
-
-- Automatic OCT payout logic on-chain
-- Backend reward processor
-- Persistent off-chain player profiles
-- Admin tools
-- Matchmaking or multiplayer
-
-## Known Operational Notes
-
-- `claim_tokens` is not a token mint or transfer function. It is only a transaction call.
-- The README and deployment guide should be updated whenever package IDs or contract behavior change.
-- The dev server may fail inside restricted sandboxes that do not allow binding to `0.0.0.0:3000`. That is an environment restriction, not an application compile error.
-
-## Verification Status
-
-Verified in this repository state:
-
-- `npm run build` in `frontend/` succeeds
-- `one move build --force` in `contracts/` succeeds
-- Contract publish to OneChain testnet succeeded with the package and leaderboard IDs listed above
-
-## Deployment Guide
-
-For wallet import, CLI setup, and republishing steps, see [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md).
-
-## License
-
-MIT
+MIT © 2025 Borka-OneChain Contributors
