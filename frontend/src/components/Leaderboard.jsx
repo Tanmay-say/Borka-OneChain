@@ -2,17 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { fetchLeaderboard } from '../hooks/useOneChain';
 import { truncateAddress, LEADERBOARD_ID } from '../lib/onechain';
 
-export default function Leaderboard() {
+export default function Leaderboard({ refreshKey = 0 }) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const load = () => {
     setLoading(true);
     fetchLeaderboard().then(data => {
       setEntries(data);
       setLoading(false);
     });
-  }, []);
+  };
+
+  useEffect(() => {
+    load();
+  }, [refreshKey]);
 
   if (!LEADERBOARD_ID) {
     return (
@@ -24,9 +28,27 @@ export default function Leaderboard() {
 
   return (
     <div style={containerStyle} data-testid="leaderboard">
-      <h3 style={{ color: '#ffd700', marginBottom: '10px', fontSize: '16px' }}>
-        🏆 On-Chain Leaderboard
-      </h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+        <h3 style={{ color: '#ffd700', fontSize: '16px', margin: 0 }}>
+          🏆 On-Chain Leaderboard
+        </h3>
+        <button
+          onClick={load}
+          disabled={loading}
+          style={{
+            background: 'none',
+            border: '1px solid #444',
+            borderRadius: '8px',
+            color: '#888',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontSize: '12px',
+            padding: '3px 8px',
+            fontFamily: '"Courier New", monospace',
+          }}
+        >
+          {loading ? '...' : '↻ Refresh'}
+        </button>
+      </div>
       {loading ? (
         <p style={{ color: '#888' }}>Loading...</p>
       ) : entries.length === 0 ? (
@@ -68,6 +90,7 @@ const containerStyle = {
   fontFamily: '"Courier New", monospace',
   color: '#fff',
   minWidth: '300px',
+  maxWidth: '380px',
 };
 const th = { padding: '6px 8px', textAlign: 'left' };
 const td = { padding: '6px 8px', color: '#ccc' };

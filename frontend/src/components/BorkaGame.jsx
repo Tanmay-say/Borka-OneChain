@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useWallet } from '../contexts/WalletContext';
 import WalletButton from './WalletButton';
 import Leaderboard from './Leaderboard';
-import { useSubmitScore, useClaimTokens } from '../hooks/useOneChain';
+import { checkDevilBorisNFT, useSubmitScore, useClaimTokens, useMintDevilBoris } from '../hooks/useOneChain';
 import { explorerTxUrl } from '../lib/onechain';
 
 // ═══════════════════════════════════════
@@ -21,6 +21,59 @@ const JUMP_FORCE = -440;
 const MOVE_SPEED = 230;
 const MAX_FALL_SPEED = 900;
 const MAX_JUMPS = 2;
+
+const SKINS = {
+  default: {
+    id: 'default',
+    name: 'Classic Boris',
+    body: '#4ab8e8',
+    bodyDark: '#3a8ab8',
+    horn: '#8B4513',
+    iris: '#2a7aa8',
+    unlocked: true,
+    nftRequired: false,
+  },
+  fire: {
+    id: 'fire',
+    name: 'Fire Boris',
+    body: '#ff6b35',
+    bodyDark: '#cc4a1a',
+    horn: '#cc1144',
+    iris: '#ff3300',
+    unlocked: true,
+    nftRequired: false,
+  },
+  ice: {
+    id: 'ice',
+    name: 'Ice Boris',
+    body: '#a8d8ea',
+    bodyDark: '#4a90d9',
+    horn: '#4a90d9',
+    iris: '#00bfff',
+    unlocked: true,
+    nftRequired: false,
+  },
+  shadow: {
+    id: 'shadow',
+    name: 'Shadow Boris',
+    body: '#3d3d3d',
+    bodyDark: '#1a1a1a',
+    horn: '#666666',
+    iris: '#9b59b6',
+    unlocked: true,
+    nftRequired: false,
+  },
+  devil: {
+    id: 'devil',
+    name: 'Devil Boris',
+    body: '#cc0000',
+    bodyDark: '#800000',
+    horn: '#8b0000',
+    iris: '#ff0000',
+    unlocked: false,
+    nftRequired: true,
+  },
+};
 
 // ═══════════════════════════════════════
 // LEVEL DEFINITIONS
@@ -441,6 +494,10 @@ const BorkaGame = () => {
   const [gameScreen, setGameScreen] = useState('intro');
   const [displayDeaths, setDisplayDeaths] = useState(0);
   const [displayCoins, setDisplayCoins] = useState(0);
+  const [leaderboardRefreshKey, setLeaderboardRefreshKey] = useState(0);
+  const [activeSkin, setActiveSkin] = useState('default');
+  const [hasDevilNFT, setHasDevilNFT] = useState(false);
+  const [nftTxDigest, setNftTxDigest] = useState(null);
 
   // Game state refs
   const gameScreenRef = useRef('intro');
@@ -454,6 +511,7 @@ const BorkaGame = () => {
   const { address, isConnected, shortAddress } = useWallet();
   const { submitScore, isPending: isSubmitting, txDigest: scoreTxDigest } = useSubmitScore();
   const { claimTokens, isPending: isClaiming, txDigest: claimTxDigest } = useClaimTokens();
+  const { mintNFT, isPending: isMintingNFT, txDigest: nftMintDigest } = useMintDevilBoris();
 
   // Track game start time for elapsed time scoring
   const gameStartTimeRef = useRef(Date.now());
@@ -480,6 +538,43 @@ const BorkaGame = () => {
   useEffect(() => {
     gameScreenRef.current = gameScreen;
   }, [gameScreen]);
+
+  useEffect(() => {
+    if (scoreTxDigest) {
+      setLeaderboardRefreshKey((key) => key + 1);
+    }
+  }, [scoreTxDigest]);
+
+  useEffect(() => {
+    if (!isConnected || !address) {
+      setHasDevilNFT(false);
+      if (activeSkin === 'devil') {
+        setActiveSkin('default');
+      }
+      return;
+    }
+
+    let cancelled = false;
+    checkDevilBorisNFT(address).then((has) => {
+      if (cancelled) return;
+      setHasDevilNFT(has);
+      if (!has && activeSkin === 'devil') {
+        setActiveSkin('default');
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isConnected, address, activeSkin]);
+
+  useEffect(() => {
+    if (nftMintDigest) {
+      setNftTxDigest(nftMintDigest);
+      setHasDevilNFT(true);
+      setActiveSkin('devil');
+    }
+  }, [nftMintDigest]);
 
   // ═══════════════════════════════════════
   // HELPER FUNCTIONS
@@ -1043,7 +1138,7 @@ const BorkaGame = () => {
           animFrame: 0,
           facingRight: true,
         };
-        drawBoris(ctx, bigBoris, time);
+        drawBoris(ctx, bigBoris, time, activeSkin);
       }
     }
 
@@ -1057,7 +1152,9 @@ const BorkaGame = () => {
   // DRAWING FUNCTIONS
   // ═══════════════════════════════════════
 
-  const drawBoris = (ctx, player, time) => {
+  const drawBoris = (ctx, player, time, skinId = 'default') => {
+    const palette = SKINS[skinId] || SKINS.default;
+
     ctx.save();
     ctx.translate(player.x + player.w / 2, player.y + player.h / 2);
 
@@ -1073,8 +1170,13 @@ const BorkaGame = () => {
       bobY = Math.sin(time * 0.003) * 2;
     }
 
+    if (skinId === 'devil') {
+      ctx.shadowColor = '#ff0000';
+      ctx.shadowBlur = 12;
+    }
+
     // Body
-    ctx.fillStyle = '#4ab8e8';
+    ctx.fillStyle = palette.body;
     ctx.beginPath();
     ctx.ellipse(0, bobY, 18, 20, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -1089,21 +1191,39 @@ const BorkaGame = () => {
       ctx.fill();
     }
 
-    // Horns
-    ctx.fillStyle = '#8B4513';
-    ctx.beginPath();
-    ctx.moveTo(-12, -18 + bobY);
-    ctx.lineTo(-8, -26 + bobY);
-    ctx.lineTo(-6, -18 + bobY);
-    ctx.closePath();
-    ctx.fill();
+    ctx.shadowBlur = 0;
 
-    ctx.beginPath();
-    ctx.moveTo(12, -18 + bobY);
-    ctx.lineTo(8, -26 + bobY);
-    ctx.lineTo(6, -18 + bobY);
-    ctx.closePath();
-    ctx.fill();
+    // Horns
+    ctx.fillStyle = palette.horn;
+    if (skinId === 'devil') {
+      ctx.beginPath();
+      ctx.moveTo(-12, -18 + bobY);
+      ctx.quadraticCurveTo(-18, -34 + bobY, -8, -32 + bobY);
+      ctx.lineTo(-6, -18 + bobY);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(12, -18 + bobY);
+      ctx.quadraticCurveTo(18, -34 + bobY, 8, -32 + bobY);
+      ctx.lineTo(6, -18 + bobY);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(-12, -18 + bobY);
+      ctx.lineTo(-8, -26 + bobY);
+      ctx.lineTo(-6, -18 + bobY);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(12, -18 + bobY);
+      ctx.lineTo(8, -26 + bobY);
+      ctx.lineTo(6, -18 + bobY);
+      ctx.closePath();
+      ctx.fill();
+    }
 
     // Eye
     if (state === 'dead') {
@@ -1123,7 +1243,7 @@ const BorkaGame = () => {
       ctx.fill();
 
       // Iris
-      ctx.fillStyle = '#2a7aa8';
+      ctx.fillStyle = palette.iris;
       ctx.beginPath();
       ctx.arc(0, -2 + bobY, 6, 0, Math.PI * 2);
       ctx.fill();
@@ -1177,7 +1297,7 @@ const BorkaGame = () => {
     }
 
     // Arms
-    ctx.fillStyle = '#4ab8e8';
+    ctx.fillStyle = palette.body;
     if (state === 'victory') {
       // Arms up
       ctx.fillRect(-20, -8 + bobY, 8, 6);
@@ -1193,7 +1313,7 @@ const BorkaGame = () => {
     ctx.fillRect(2, 16 + bobY - legOffset, 6, 8);
 
     // Feet
-    ctx.fillStyle = '#3a8ab8';
+    ctx.fillStyle = palette.bodyDark;
     ctx.beginPath();
     ctx.ellipse(-5, 24 + bobY + legOffset, 4, 2, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -1373,7 +1493,7 @@ const BorkaGame = () => {
 
     // Boris
     if (player) {
-      drawBoris(ctx, player, time);
+      drawBoris(ctx, player, time, activeSkin);
     }
 
     // Particles
@@ -1589,6 +1709,46 @@ const BorkaGame = () => {
           Playing as {shortAddress}
         </p>
       )}
+      <div style={{ marginTop: '20px', textAlign: 'center' }}>
+        <p style={{ color: '#888', fontSize: '12px', marginBottom: '8px' }}>Choose your skin:</p>
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {Object.values(SKINS).map((skin) => {
+            const isLocked = skin.nftRequired && !hasDevilNFT;
+            const isActive = activeSkin === skin.id;
+            return (
+              <button
+                key={skin.id}
+                onClick={() => {
+                  if (!isLocked) setActiveSkin(skin.id);
+                }}
+                title={isLocked ? 'Complete all 8 levels and mint the NFT to unlock' : skin.name}
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  border: isActive ? '3px solid #ffd700' : '2px solid #444',
+                  background: isLocked ? '#1a1a1a' : skin.body,
+                  cursor: isLocked ? 'not-allowed' : 'pointer',
+                  opacity: isLocked ? 0.4 : 1,
+                  fontSize: '18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                  transition: 'transform 0.1s',
+                  transform: isActive ? 'scale(1.15)' : 'scale(1)',
+                }}
+              >
+                {isLocked ? '🔒' : ''}
+              </button>
+            );
+          })}
+        </div>
+        <p style={{ color: '#888', fontSize: '11px', marginTop: '6px' }}>
+          {SKINS[activeSkin]?.name}
+          {activeSkin !== 'devil' && hasDevilNFT ? ' · Devil Boris unlocked' : ''}
+        </p>
+      </div>
       <style>
         {`
           @keyframes pulse {
@@ -1750,7 +1910,7 @@ const BorkaGame = () => {
 
         {/* Leaderboard in bottom left */}
         <div style={{ position: 'absolute', bottom: '20px', left: '20px' }}>
-          <Leaderboard />
+          <Leaderboard refreshKey={leaderboardRefreshKey} />
         </div>
       </div>
 
@@ -1771,6 +1931,7 @@ const BorkaGame = () => {
             totalDeathsRef.current = 0;
             totalCoinsRef.current = 0;
             unlockedLevelsRef.current = new Set([0]);
+            gameStartTimeRef.current = Date.now();
             initLevel(0);
             setGameScreen('playing');
           }}
@@ -1861,6 +2022,8 @@ const BorkaGame = () => {
             totalDeathsRef.current = 0;
             totalCoinsRef.current = 0;
             unlockedLevelsRef.current = new Set([0]);
+            gameStartTimeRef.current = Date.now();
+            setNftTxDigest(null);
             setGameScreen('worldmap');
           }}
           style={{
@@ -1884,24 +2047,24 @@ const BorkaGame = () => {
             {!claimTxDigest ? (
               <button
                 data-testid="claim-tokens-button"
-                onClick={() => claimTokens({ coins: totalCoinsRef.current })}
-                disabled={isClaiming}
+                onClick={() => claimTokens({ coins: 1 })}
+                disabled={isClaiming || isSubmitting}
                 style={{
                   fontSize: '20px',
                   padding: '14px 40px',
-                  background: isClaiming
+                  background: isClaiming || isSubmitting
                     ? '#555'
                     : 'linear-gradient(135deg, #1D9E75, #0f6e56)',
                   border: 'none',
                   borderRadius: '50px',
                   color: '#fff',
-                  cursor: isClaiming ? 'not-allowed' : 'pointer',
+                  cursor: isClaiming || isSubmitting ? 'not-allowed' : 'pointer',
                   fontWeight: 'bold',
                 }}
               >
                 {isClaiming
                   ? '⏳ Claiming...'
-                  : `🪙 Claim ${totalCoinsRef.current * 10} OCT Tokens`}
+                  : `🪙 Claim 1 OCT Token (${totalCoinsRef.current} coins earned)`}
               </button>
             ) : (
               <div>
@@ -1936,6 +2099,51 @@ const BorkaGame = () => {
               </p>
             )}
           </div>
+        )}
+        {isConnected && !hasDevilNFT && (
+          <div style={{ marginTop: '20px', padding: '16px', border: '1px solid #cc0000', borderRadius: '12px', textAlign: 'center' }}>
+            <p style={{ color: '#ffd700', fontWeight: 'bold', marginBottom: '8px' }}>
+              😈 You unlocked Devil Boris!
+            </p>
+            <p style={{ color: '#888', fontSize: '12px', marginBottom: '12px' }}>
+              Mint your exclusive NFT skin to your wallet
+            </p>
+            {!nftTxDigest ? (
+              <button
+                onClick={mintNFT}
+                disabled={isMintingNFT}
+                style={{
+                  fontSize: '16px',
+                  padding: '12px 30px',
+                  background: isMintingNFT ? '#555' : 'linear-gradient(135deg, #cc0000, #800000)',
+                  border: 'none',
+                  borderRadius: '25px',
+                  color: '#fff',
+                  cursor: isMintingNFT ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold',
+                }}
+              >
+                {isMintingNFT ? '⏳ Minting...' : '🎨 Mint Devil Boris NFT'}
+              </button>
+            ) : (
+              <div>
+                <p style={{ color: '#1D9E75', fontWeight: 'bold' }}>✅ Devil Boris NFT Minted!</p>
+                <a
+                  href={explorerTxUrl(nftTxDigest)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#4ab8e8', fontSize: '13px' }}
+                >
+                  View on Explorer ↗
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+        {isConnected && hasDevilNFT && (
+          <p style={{ color: '#cc0000', fontSize: '13px', marginTop: '12px' }}>
+            😈 Devil Boris NFT already in your wallet
+          </p>
         )}
         {!isConnected && (
           <div style={{ marginTop: '16px' }}>

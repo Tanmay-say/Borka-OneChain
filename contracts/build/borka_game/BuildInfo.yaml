@@ -5,14 +5,14 @@ compiled_package_info:
     borka_game: "0000000000000000000000000000000000000000000000000000000000000000"
     one: "0000000000000000000000000000000000000000000000000000000000000002"
     std: "0000000000000000000000000000000000000000000000000000000000000001"
-  source_digest: C3549228EB6ADFB4EED2FC00C74C882C892A489D0E8A31295045AFFB8FB99380
+  source_digest: 6BE9C73860014DA2E84947C3A9943B7BF2FDBFD7BB1D9DECC2B2AF9E4F6E657E
   build_flags:
     dev_mode: false
     test_mode: false
     generate_docs: false
     save_disassembly: false
     install_dir: ~
-    force_recompilation: true
+    force_recompilation: false
     lock_file: "./Move.lock"
     fetch_deps_only: false
     skip_fetch_latest_git_deps: false

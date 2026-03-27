@@ -11,7 +11,11 @@ export function WalletContextProvider({ children }) {
   const { mutate: disconnectWallet } = useDisconnectWallet();
 
   const connect = () => {
-    if (wallets.length > 0) connectWallet({ wallet: wallets[0] });
+    if (wallets.length === 0) {
+      window.open('https://onelabs.cc', '_blank');
+      return;
+    }
+    connectWallet({ wallet: wallets[0] });
   };
 
   const value = {

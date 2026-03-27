@@ -1,70 +1,46 @@
-# Getting Started with Create React App
+# BORKA — GameFi Platformer on OneChain
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A browser-based platformer with on-chain leaderboard, token rewards, and NFT skins on OneChain OCT testnet.
 
-## Available Scripts
+## What's implemented
 
-In the project directory, you can run:
+- 8-level canvas platformer (traps, fake platforms, gravity flip, moving spikes)
+- OneWallet connect via @onelabs/dapp-kit
+- On-chain leaderboard (shared Move object, top 10 scores)
+- Score submission on run completion
+- 1 OCT token claim per completed run
+- 4 Boris skin variants (Default, Fire, Ice, Shadow)
+- Devil Boris NFT skin minted after completing all 8 levels
 
-### `npm start`
+## Deployed contract
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Package: set in `frontend/.env` as `REACT_APP_PACKAGE_ID`
+- Leaderboard: set in `frontend/.env` as `REACT_APP_LEADERBOARD_ID`
+- Mint Registry: set in `frontend/.env` as `REACT_APP_MINT_REGISTRY_ID`
+- Network: OneChain OCT Testnet (`https://onescan.cc/testnet`)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Local setup
 
-### `npm test`
+```bash
+cd frontend
+yarn install
+yarn start
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Contract deploy
 
-### `npm run build`
+```bash
+cd contracts
+one move build --force
+one client publish --gas-budget 200000000 --skip-dependency-verification
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Score formula
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+`score = coins × 100 − deaths × 50`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Higher coins and fewer deaths give a better rank.
 
-### `npm run eject`
+## Token reward
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1 OCT token per completed run. The on-chain claim transaction is the proof of claim for the current MVP flow.

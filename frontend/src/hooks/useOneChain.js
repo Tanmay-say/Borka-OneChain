@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useSignAndExecuteTransaction } from '@onelabs/dapp-kit';
 import { Transaction } from '@onelabs/sui/transactions';
-import { PACKAGE_ID, LEADERBOARD_ID, suiClient } from '../lib/onechain';
+import { PACKAGE_ID, LEADERBOARD_ID, MINT_REGISTRY_ID, suiClient } from '../lib/onechain';
 
 export function useSubmitScore() {
   const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction();
@@ -45,12 +45,12 @@ export function useClaimTokens() {
       setError('Contract not configured');
       return;
     }
+    const _ = coins;
     const tx = new Transaction();
     tx.moveCall({
       target: `${PACKAGE_ID}::borka_game::claim_tokens`,
       arguments: [
         tx.object(LEADERBOARD_ID),
-        tx.pure.u64(coins),
       ],
     });
     signAndExecute(
@@ -63,6 +63,49 @@ export function useClaimTokens() {
   }, [signAndExecute]);
 
   return { claimTokens, isPending, txDigest, error };
+}
+
+export function useMintDevilBoris() {
+  const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction();
+  const [txDigest, setTxDigest] = useState(null);
+  const [error, setError] = useState(null);
+
+  const mintNFT = useCallback(() => {
+    if (!PACKAGE_ID || !MINT_REGISTRY_ID) {
+      setError('Contract not configured');
+      return;
+    }
+    const tx = new Transaction();
+    tx.moveCall({
+      target: `${PACKAGE_ID}::borka_game::mint_devil_boris`,
+      arguments: [tx.object(MINT_REGISTRY_ID)],
+    });
+    signAndExecute(
+      { transaction: tx },
+      {
+        onSuccess: (result) => setTxDigest(result.digest),
+        onError: (err) => setError(err.message),
+      }
+    );
+  }, [signAndExecute]);
+
+  return { mintNFT, isPending, txDigest, error };
+}
+
+export async function checkDevilBorisNFT(address) {
+  if (!address || !PACKAGE_ID) return false;
+  try {
+    const objects = await suiClient.getOwnedObjects({
+      owner: address,
+      filter: {
+        StructType: `${PACKAGE_ID}::borka_game::BorisSkinNFT`,
+      },
+      options: { showContent: true },
+    });
+    return objects.data.length > 0;
+  } catch {
+    return false;
+  }
 }
 
 export async function fetchLeaderboard() {

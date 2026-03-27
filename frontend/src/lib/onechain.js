@@ -5,6 +5,7 @@ export const RPC_URL = process.env.REACT_APP_ONECHAIN_RPC || 'https://rpc-testne
 export const EXPLORER_URL = process.env.REACT_APP_ONECHAIN_EXPLORER || 'https://onescan.cc/testnet';
 export const PACKAGE_ID = process.env.REACT_APP_PACKAGE_ID || '';
 export const LEADERBOARD_ID = process.env.REACT_APP_LEADERBOARD_ID || '';
+export const MINT_REGISTRY_ID = process.env.REACT_APP_MINT_REGISTRY_ID || '';
 
 export const suiClient = new SuiClient({ url: RPC_URL });
 
