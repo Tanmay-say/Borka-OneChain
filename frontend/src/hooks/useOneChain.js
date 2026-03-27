@@ -1,7 +1,28 @@
 import { useState, useCallback } from 'react';
 import { useSignAndExecuteTransaction } from '@onelabs/dapp-kit';
 import { Transaction } from '@onelabs/sui/transactions';
-import { PACKAGE_ID, LEADERBOARD_ID, MINT_REGISTRY_ID, publicAssetUrl, suiClient } from '../lib/onechain';
+import { PACKAGE_ID, LEADERBOARD_ID, MINT_REGISTRY_ID, suiClient } from '../lib/onechain';
+
+// Resolve the base URL for NFT assets — use the deployed frontend URL, never localhost
+const ASSET_BASE_URL =
+  process.env.REACT_APP_BACKEND_URL ||
+  (typeof window !== 'undefined' && window.location.origin !== 'http://localhost:3000'
+    ? window.location.origin
+    : 'https://borka-game.preview.emergentagent.com');
+
+const NFT_IMAGE_URL     = `${ASSET_BASE_URL}/1`;
+const NFT_THUMBNAIL_URL = `${ASSET_BASE_URL}/2.png`;
+
+function normalizeWalletError(error) {
+  const message = error?.message || String(error || 'Unknown error');
+  if (/reject/i.test(message) || /denied/i.test(message) || /User rejected/i.test(message)) {
+    return 'Request cancelled in wallet.';
+  }
+  if (/Failed to fetch/i.test(message)) {
+    return 'Wallet or RPC connection failed. Reload the app and try again.';
+  }
+  return message;
+}
 
 export function useSubmitScore() {
   const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction();
@@ -29,7 +50,7 @@ export function useSubmitScore() {
       { transaction: tx },
       {
         onSuccess: (result) => setTxDigest(result.digest),
-        onError: (err) => setError(err.message),
+        onError: (err) => setError(normalizeWalletError(err)),
       }
     );
   }, [signAndExecute]);
@@ -66,7 +87,7 @@ export function useClaimTokens() {
       { transaction: tx },
       {
         onSuccess: (result) => setTxDigest(result.digest),
-        onError: (err) => setError(err.message),
+        onError: (err) => setError(normalizeWalletError(err)),
       }
     );
   }, [signAndExecute]);
@@ -93,8 +114,8 @@ export function useMintDevilBoris() {
     }
     const name = 'Devil Borka';
     const description = 'Exclusive Devil Borka skin NFT unlocked after beating all 8 BORKA levels.';
-    const imageUrl = publicAssetUrl('/1');
-    const thumbnailUrl = publicAssetUrl('/2.png');
+    const imageUrl = NFT_IMAGE_URL;
+    const thumbnailUrl = NFT_THUMBNAIL_URL;
     const tx = new Transaction();
     tx.moveCall({
       target: `${PACKAGE_ID}::borka_game::mint_devil_borka`,
@@ -110,7 +131,7 @@ export function useMintDevilBoris() {
       { transaction: tx },
       {
         onSuccess: (result) => setTxDigest(result.digest),
-        onError: (err) => setError(err.message),
+        onError: (err) => setError(normalizeWalletError(err)),
       }
     );
   }, [signAndExecute]);
@@ -146,18 +167,30 @@ export async function fetchLeaderboard() {
       id: LEADERBOARD_ID,
       options: { showContent: true },
     });
-    const entries = obj?.data?.content?.fields?.entries || [];
-    return entries
-      .map(e => ({
-        address: e.fields?.player,
-        coins: Number(e.fields?.coins),
-        deaths: Number(e.fields?.deaths),
-        timeMs: Number(e.fields?.time_ms),
-        score: Number(e.fields?.coins) * 100 - Number(e.fields?.deaths) * 50,
-      }))
+    // The RPC may nest entries differently depending on the client version.
+    // Try both common shapes.
+    const fields = obj?.data?.content?.fields || {};
+    const rawEntries = fields.entries || [];
+    if (rawEntries.length === 0 && obj?.data?.content?.fields === undefined) {
+      console.warn('[Borka] fetchLeaderboard: no content fields returned. Check RPC connection.');
+    }
+    return rawEntries
+      .map(e => {
+        // Each entry may be {fields: {...}} or directly the fields object
+        const f = e?.fields ?? e;
+        return {
+          address: f?.player,
+          coins: Number(f?.coins ?? 0),
+          deaths: Number(f?.deaths ?? 0),
+          timeMs: Number(f?.time_ms ?? 0),
+          score: Number(f?.coins ?? 0) * 100 - Number(f?.deaths ?? 0) * 50,
+        };
+      })
+      .filter(e => e.address)
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
-  } catch {
-    return [];
+  } catch (err) {
+    console.error('[Borka] fetchLeaderboard error:', err);
+    throw err; // Re-throw so Leaderboard.jsx can show an error state
   }
 }

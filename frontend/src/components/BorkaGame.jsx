@@ -2047,90 +2047,90 @@ const BorkaGame = () => {
             }}
           >
             <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0 }}>
-          <path
-            d="M 85,380 Q 180,300 260,260 T 430,190 Q 560,130 690,170 T 805,300"
-            stroke="rgba(255,255,255,0.68)"
-            strokeWidth="4"
-            strokeDasharray="10,10"
-            fill="none"
-            opacity="0.75"
-          />
-        </svg>
+              <path
+                d="M 85,380 Q 180,300 260,260 T 430,190 Q 560,130 690,170 T 805,300"
+                stroke="rgba(255,255,255,0.68)"
+                strokeWidth="4"
+                strokeDasharray="10,10"
+                fill="none"
+                opacity="0.75"
+              />
+            </svg>
 
-        {LEVELS.map((level, idx) => {
-          const positions = [
-            { x: 70, y: 350 },
-            { x: 190, y: 265 },
-            { x: 325, y: 210 },
-            { x: 470, y: 160 },
-            { x: 610, y: 150 },
-            { x: 710, y: 190 },
-            { x: 770, y: 245 },
-            { x: 805, y: 300 },
-          ];
-          const pos = positions[idx];
-          const unlocked = unlockedLevelsRef.current.has(idx);
-          const completed = idx < currentLevelRef.current;
+            {LEVELS.map((level, idx) => {
+              const positions = [
+                { x: 70, y: 350 },
+                { x: 190, y: 265 },
+                { x: 325, y: 210 },
+                { x: 470, y: 160 },
+                { x: 610, y: 150 },
+                { x: 710, y: 190 },
+                { x: 770, y: 245 },
+                { x: 805, y: 300 },
+              ];
+              const pos = positions[idx];
+              const unlocked = unlockedLevelsRef.current.has(idx);
+              const completed = idx < currentLevelRef.current;
 
-          return (
-            <div
-              key={idx}
-              data-testid={`level-node-${idx + 1}`}
-              onClick={() => {
-                if (unlocked) {
-                  currentLevelRef.current = idx;
-                  initLevel(idx);
-                  setGameScreen('playing');
-                }
-              }}
-              style={{
-                position: 'absolute',
-                left: pos.x,
-                top: pos.y,
-                width: '60px',
-                height: '60px',
-                borderRadius: '50%',
-                background: unlocked ? 'linear-gradient(180deg, #fff6d8, #ffd36e)' : '#465063',
-                border: completed ? '4px solid #ffd36e' : '4px solid rgba(255,255,255,0.22)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#333',
-                cursor: unlocked ? 'pointer' : 'not-allowed',
-                boxShadow: unlocked ? '0 14px 30px rgba(0,0,0,0.28)' : 'none',
-                transform: idx === currentLevelRef.current ? 'scale(1.2)' : 'scale(1)',
-                transition: 'transform 0.3s',
-              }}
-            >
-              {completed ? '⭐' : idx + 1}
-              {!unlocked && <div style={{ position: 'absolute', fontSize: '30px' }}>🔒</div>}
-            </div>
-          );
-        })}
+              return (
+                <div
+                  key={idx}
+                  data-testid={`level-node-${idx + 1}`}
+                  onClick={() => {
+                    if (unlocked) {
+                      currentLevelRef.current = idx;
+                      initLevel(idx);
+                      setGameScreen('playing');
+                    }
+                  }}
+                  style={{
+                    position: 'absolute',
+                    left: pos.x,
+                    top: pos.y,
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    background: unlocked ? 'linear-gradient(180deg, #fff6d8, #ffd36e)' : '#465063',
+                    border: completed ? '4px solid #ffd36e' : '4px solid rgba(255,255,255,0.22)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: '#333',
+                    cursor: unlocked ? 'pointer' : 'not-allowed',
+                    boxShadow: unlocked ? '0 14px 30px rgba(0,0,0,0.28)' : 'none',
+                    transform: idx === currentLevelRef.current ? 'scale(1.2)' : 'scale(1)',
+                    transition: 'transform 0.3s',
+                  }}
+                >
+                  {completed ? '⭐' : idx + 1}
+                  {!unlocked && <div style={{ position: 'absolute', fontSize: '30px' }}>🔒</div>}
+                </div>
+              );
+            })}
 
-        {/* Current position Borka */}
-        {currentLevelRef.current < LEVELS.length && (
-          <div
-            data-testid="boris-marker"
-            style={{
-              position: 'absolute',
-              left:
-                [70, 190, 325, 470, 610, 710, 770, 805][
-                  Math.min(currentLevelRef.current, LEVELS.length - 1)
-                ] + 30,
-              top:
-                [350, 265, 210, 160, 150, 190, 245, 300][
-                  Math.min(currentLevelRef.current, LEVELS.length - 1)
-                ] - 40,
-              fontSize: '40px',
-              animation: 'bounce 1s infinite',
-            }}
-          >
-            🔵
-          </div>
-        )}
+            {/* Current position Borka */}
+            {currentLevelRef.current < LEVELS.length && (
+              <div
+                data-testid="boris-marker"
+                style={{
+                  position: 'absolute',
+                  left:
+                    [70, 190, 325, 470, 610, 710, 770, 805][
+                    Math.min(currentLevelRef.current, LEVELS.length - 1)
+                    ] + 30,
+                  top:
+                    [350, 265, 210, 160, 150, 190, 245, 300][
+                    Math.min(currentLevelRef.current, LEVELS.length - 1)
+                    ] - 40,
+                  fontSize: '40px',
+                  animation: 'bounce 1s infinite',
+                }}
+              >
+                🔵
+              </div>
+            )}
           </div>
 
           <div
@@ -2331,17 +2331,27 @@ const BorkaGame = () => {
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'transparent',
+        background: 'radial-gradient(circle at 50% 30%, rgba(255,215,0,0.10), transparent 55%), linear-gradient(180deg, #050810 0%, #0d1320 100%)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
+        overflowY: 'auto',
         fontFamily: '"Courier New", monospace',
         color: '#fff',
-        zIndex: 100,
+        zIndex: 200,
+        paddingBottom: '40px',
       }}
     >
-      <div style={{ position: 'relative', zIndex: 101, textAlign: 'center' }}>
+      <div style={{
+        position: 'relative',
+        zIndex: 201,
+        textAlign: 'center',
+        width: '100%',
+        maxWidth: '540px',
+        padding: '48px 24px 32px',
+        margin: '0 auto',
+      }}>
         <h1
           data-testid="win-title"
           style={{
@@ -2394,50 +2404,23 @@ const BorkaGame = () => {
 
         {/* Blockchain claim section */}
         {isConnected && (
-          <div style={{ marginTop: '20px', textAlign: 'center' }}>
-            {!claimTxDigest ? (
-              <button
-                data-testid="claim-tokens-button"
-                onClick={() => claimTokens({ coins: 1 })}
-                disabled={isClaiming || isSubmitting}
-                style={{
-                  fontSize: '20px',
-                  padding: '14px 40px',
-                  background: isClaiming || isSubmitting
-                    ? '#555'
-                    : 'linear-gradient(135deg, #1D9E75, #0f6e56)',
-                  border: 'none',
-                  borderRadius: '50px',
-                  color: '#fff',
-                  cursor: isClaiming || isSubmitting ? 'not-allowed' : 'pointer',
-                  fontWeight: 'bold',
-                }}
-              >
-                {isClaiming
-                  ? '⏳ Claiming...'
-                  : `🪙 Claim 1 OCT Token (${totalCoinsRef.current} coins earned)`}
-              </button>
-            ) : (
-              <div>
-                <p style={{ color: '#1D9E75', fontWeight: 'bold' }}>
-                  ✅ Tokens Claimed!
-                </p>
-                <a
-                  href={explorerTxUrl(claimTxDigest)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: '#4ab8e8', fontSize: '13px' }}
-                >
-                  View on Explorer ↗
-                </a>
-              </div>
-            )}
+          <div style={{
+            marginTop: '24px',
+            textAlign: 'center',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            borderRadius: '16px',
+            padding: '18px 20px',
+          }}>
+            {/* Score submit status */}
             {!scoreTxDigest ? (
-              <p style={{ color: '#888', fontSize: '13px', marginTop: '10px' }}>
-                {isSubmitting ? '⏳ Submitting score to chain...' : ''}
+              <p style={{ color: '#f0c948', fontSize: '13px', marginBottom: '14px' }}>
+                {isSubmitting
+                  ? '⏳ Submitting score to chain — please wait...'
+                  : '⚠️ Score not yet submitted. Make sure your wallet is connected.'}
               </p>
             ) : (
-              <p style={{ color: '#888', fontSize: '13px', marginTop: '10px' }}>
+              <p style={{ color: '#1D9E75', fontSize: '13px', marginBottom: '14px' }}>
                 ✅ Score on-chain •{' '}
                 <a
                   href={explorerTxUrl(scoreTxDigest)}
@@ -2448,6 +2431,53 @@ const BorkaGame = () => {
                   View ↗
                 </a>
               </p>
+            )}
+
+            {/* Claim tokens */}
+            {!claimTxDigest ? (
+              <div>
+                <button
+                  data-testid="claim-tokens-button"
+                  onClick={() => claimTokens({ coins: 1 })}
+                  disabled={isClaiming || isSubmitting || !scoreTxDigest}
+                  style={{
+                    fontSize: '18px',
+                    padding: '13px 36px',
+                    background: (isClaiming || isSubmitting || !scoreTxDigest)
+                      ? '#3a3a3a'
+                      : 'linear-gradient(135deg, #1D9E75, #0f6e56)',
+                    border: 'none',
+                    borderRadius: '50px',
+                    color: (isClaiming || isSubmitting || !scoreTxDigest) ? '#777' : '#fff',
+                    cursor: (isClaiming || isSubmitting || !scoreTxDigest) ? 'not-allowed' : 'pointer',
+                    fontWeight: 'bold',
+                    transition: 'background 0.3s',
+                  }}
+                >
+                  {isClaiming
+                    ? '⏳ Recording claim...'
+                    : !scoreTxDigest
+                      ? '🔒 Waiting for score confirmation...'
+                      : `🎖️ Record OCT Reward On-Chain (${totalCoinsRef.current} coins)`}
+                </button>
+                <p style={{ color: '#6b8099', fontSize: '11px', marginTop: '8px', lineHeight: 1.5 }}>
+                  Records your reward on the blockchain. Actual OCT delivery is handled off-chain by the game backend.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <p style={{ color: '#1D9E75', fontWeight: 'bold', fontSize: '16px' }}>
+                  ✅ Reward Recorded On-Chain!
+                </p>
+                <a
+                  href={explorerTxUrl(claimTxDigest)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#4ab8e8', fontSize: '13px' }}
+                >
+                  View on Explorer ↗
+                </a>
+              </div>
             )}
           </div>
         )}

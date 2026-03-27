@@ -1,6 +1,6 @@
 import { SuiClient } from '@onelabs/sui/client';
 
-const DEFAULT_CHAIN_CONFIG = {
+export const FINAL_CHAIN_CONFIG = {
   network: 'testnet',
   rpcUrl: 'https://rpc-testnet.onelabs.cc:443',
   explorerUrl: 'https://onescan.cc/testnet',
@@ -9,12 +9,12 @@ const DEFAULT_CHAIN_CONFIG = {
   mintRegistryId: '0x5823bdfdf319242d19fcaf4fb41cd7eb89c91b8673007fda8ff0361d1e6c7c96',
 };
 
-export const NETWORK = process.env.REACT_APP_ONECHAIN_NETWORK || DEFAULT_CHAIN_CONFIG.network;
-export const RPC_URL = process.env.REACT_APP_ONECHAIN_RPC || DEFAULT_CHAIN_CONFIG.rpcUrl;
-export const EXPLORER_URL = process.env.REACT_APP_ONECHAIN_EXPLORER || DEFAULT_CHAIN_CONFIG.explorerUrl;
-export const PACKAGE_ID = process.env.REACT_APP_PACKAGE_ID || DEFAULT_CHAIN_CONFIG.packageId;
-export const LEADERBOARD_ID = process.env.REACT_APP_LEADERBOARD_ID || DEFAULT_CHAIN_CONFIG.leaderboardId;
-export const MINT_REGISTRY_ID = process.env.REACT_APP_MINT_REGISTRY_ID || DEFAULT_CHAIN_CONFIG.mintRegistryId;
+export const NETWORK = FINAL_CHAIN_CONFIG.network;
+export const RPC_URL = FINAL_CHAIN_CONFIG.rpcUrl;
+export const EXPLORER_URL = FINAL_CHAIN_CONFIG.explorerUrl;
+export const PACKAGE_ID = FINAL_CHAIN_CONFIG.packageId;
+export const LEADERBOARD_ID = FINAL_CHAIN_CONFIG.leaderboardId;
+export const MINT_REGISTRY_ID = FINAL_CHAIN_CONFIG.mintRegistryId;
 
 export const suiClient = new SuiClient({ url: RPC_URL });
 

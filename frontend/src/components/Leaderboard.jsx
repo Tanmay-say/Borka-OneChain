@@ -5,13 +5,21 @@ import { truncateAddress, LEADERBOARD_ID } from '../lib/onechain';
 export default function Leaderboard({ refreshKey = 0 }) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const load = () => {
     setLoading(true);
-    fetchLeaderboard().then(data => {
-      setEntries(data);
-      setLoading(false);
-    });
+    setError(null);
+    fetchLeaderboard()
+      .then(data => {
+        setEntries(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('[Leaderboard] fetch failed:', err);
+        setError('Could not load leaderboard. Check your RPC connection.');
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -56,6 +64,25 @@ export default function Leaderboard({ refreshKey = 0 }) {
       </div>
       {loading ? (
         <p style={{ color: '#888' }}>Loading...</p>
+      ) : error ? (
+        <div>
+          <p style={{ color: '#ff8a8a', fontSize: '12px', marginBottom: '8px' }}>{error}</p>
+          <button
+            onClick={load}
+            style={{
+              background: 'none',
+              border: '1px solid #555',
+              borderRadius: '6px',
+              color: '#888',
+              cursor: 'pointer',
+              fontSize: '12px',
+              padding: '3px 10px',
+              fontFamily: '"Courier New", monospace',
+            }}
+          >
+            ↻ Retry
+          </button>
+        </div>
       ) : entries.length === 0 ? (
         <p style={{ color: '#888' }}>No scores yet. Be first!</p>
       ) : (

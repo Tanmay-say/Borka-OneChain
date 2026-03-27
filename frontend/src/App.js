@@ -1,10 +1,9 @@
-import { useEffect } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SuiClientProvider, WalletProvider } from '@onelabs/dapp-kit';
 import '@onelabs/dapp-kit/dist/index.css';
-import { suiClient } from '@/lib/onechain';
+import { NETWORK, RPC_URL } from '@/lib/onechain';
 import { WalletContextProvider } from '@/contexts/WalletContext';
 import BorkaGame from "@/components/BorkaGame.jsx";
 
@@ -15,7 +14,14 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <SuiClientProvider client={suiClient}>
+      <SuiClientProvider
+        networks={{
+          [NETWORK]: {
+            url: RPC_URL,
+          },
+        }}
+        defaultNetwork={NETWORK}
+      >
         <WalletProvider autoConnect>
           <WalletContextProvider>
             <div className="App">
